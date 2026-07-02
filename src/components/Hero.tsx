@@ -1,10 +1,14 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, Suspense } from "react";
 import { motion, useMotionValue, useSpring } from "framer-motion";
+import { Canvas } from "@react-three/fiber";
+import dynamic from "next/dynamic";
+
+const Scene = dynamic(() => import("./Scene"), { ssr: false });
 
 const HERO_TEXT_CLASS =
-  "inline-block text-[clamp(3.5rem,12vw,13rem)] leading-[0.9] tracking-[-0.04em] font-bold font-display will-change-transform";
+  "inline-block text-[clamp(4rem,14vw,15rem)] leading-[0.85] tracking-[-0.05em] font-bold font-display will-change-transform mix-blend-difference text-white";
 
 function HeroLetter({
   char,
@@ -48,8 +52,8 @@ function HeroLetter({
       const dx = mouseX.get() - centerX;
       const dy = mouseY.get() - centerY;
       const distance = Math.sqrt(dx * dx + dy * dy);
-      const maxDistance = 300;
-      const strength = 18;
+      const maxDistance = 350;
+      const strength = 25;
 
       if (distance < maxDistance) {
         const force = (1 - distance / maxDistance) * strength;
@@ -77,11 +81,11 @@ function HeroLetter({
       ref={letterRef}
       className={HERO_TEXT_CLASS}
       style={{ x: springX, y: springY }}
-      initial={{ opacity: 0, y: 60 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0, y: 100, rotate: 10 }}
+      animate={{ opacity: 1, y: 0, rotate: 0 }}
       transition={{
-        duration: 0.8,
-        delay: 0.05 * index + 0.3,
+        duration: 1,
+        delay: 0.05 * index + 0.2,
         ease: [0.16, 1, 0.3, 1],
       }}
     >
@@ -115,48 +119,66 @@ export default function Hero() {
     <section
       ref={containerRef}
       id="hero"
-      className="min-h-screen flex flex-col justify-end relative px-6 md:px-10 pb-10 md:pb-16 overflow-hidden"
+      className="min-h-screen flex flex-col justify-end relative px-6 md:px-10 pb-10 md:pb-16 overflow-hidden bg-[#FAFAF9]"
     >
+      {/* 3D Background */}
+      <div className="absolute inset-0 z-0 opacity-80 mix-blend-multiply">
+        <Suspense fallback={null}>
+          <Canvas camera={{ position: [0, 0, 8], fov: 45 }}>
+            <Scene />
+          </Canvas>
+        </Suspense>
+      </div>
+
+      {/* Grid overlay pattern */}
+      <div 
+        className="absolute inset-0 z-[1] opacity-[0.05] pointer-events-none" 
+        style={{
+          backgroundImage: `linear-gradient(#111 1px, transparent 1px), linear-gradient(90deg, #111 1px, transparent 1px)`,
+          backgroundSize: '40px 40px'
+        }}
+      />
+
       {/* Top label */}
       <motion.div
-        className="absolute top-28 md:top-32 left-6 md:left-10"
+        className="absolute top-28 md:top-32 left-6 md:left-10 z-10 mix-blend-difference text-white"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.2, duration: 0.6 }}
       >
-        <span className="font-mono text-[11px] tracking-widest text-[#999] uppercase">
+        <span className="font-mono text-[11px] tracking-widest uppercase">
           Portfolio — 2025
         </span>
       </motion.div>
 
       {/* Available badge */}
       <motion.div
-        className="absolute top-28 md:top-32 right-6 md:right-10"
+        className="absolute top-28 md:top-32 right-6 md:right-10 z-10 mix-blend-difference text-white"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.4, duration: 0.6 }}
       >
         <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-          <span className="font-mono text-[11px] tracking-widest text-[#999] uppercase">
+          <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+          <span className="font-mono text-[11px] tracking-widest uppercase">
             Available for work
           </span>
         </div>
       </motion.div>
 
       {/* Name */}
-      <div className="mb-4 -ml-1 md:-ml-3">
+      <div className="mb-4 -ml-1 md:-ml-3 z-10">
         <div className="flex flex-wrap" aria-label="Andhika Rafi">
           {firstName.split("").map((char, i) =>
             isMobile ? (
               <motion.span
                 key={`first-${i}`}
                 className={HERO_TEXT_CLASS}
-                initial={{ opacity: 0, y: 60 }}
-                animate={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, y: 100, rotate: 10 }}
+                animate={{ opacity: 1, y: 0, rotate: 0 }}
                 transition={{
-                  duration: 0.8,
-                  delay: 0.05 * i + 0.3,
+                  duration: 1,
+                  delay: 0.05 * i + 0.2,
                   ease: [0.16, 1, 0.3, 1],
                 }}
               >
@@ -181,11 +203,11 @@ export default function Hero() {
                 <motion.span
                   key={`last-${i}`}
                   className={HERO_TEXT_CLASS}
-                  initial={{ opacity: 0, y: 60 }}
-                  animate={{ opacity: 1, y: 0 }}
+                  initial={{ opacity: 0, y: 100, rotate: 10 }}
+                  animate={{ opacity: 1, y: 0, rotate: 0 }}
                   transition={{
-                    duration: 0.8,
-                    delay: 0.05 * (i + firstName.length) + 0.3,
+                    duration: 1,
+                    delay: 0.05 * (i + firstName.length) + 0.2,
                     ease: [0.16, 1, 0.3, 1],
                   }}
                 >
@@ -205,12 +227,12 @@ export default function Hero() {
 
           {/* Role badge */}
           <motion.div
-            className="mb-2 md:mb-6"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 1.0, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+            className="mb-3 md:mb-8"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 1.0, duration: 0.8, type: "spring" }}
           >
-            <span className="inline-block bg-[#2A4CFF] text-white px-4 py-1.5 rounded-full font-mono text-[10px] md:text-xs tracking-widest uppercase">
+            <span className="inline-block bg-[#DFF25C] text-[#111] px-5 py-2 rounded-full font-mono text-[10px] md:text-sm tracking-widest uppercase font-bold border border-[#111]">
               Software Developer
             </span>
           </motion.div>
@@ -219,31 +241,30 @@ export default function Hero() {
 
       {/* Bottom info row */}
       <motion.div
-        className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-t border-[#e0e0e0] pt-4"
+        className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-t border-[#111]/10 pt-6 z-10 mix-blend-difference text-white"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 1.2, duration: 0.6 }}
       >
-        <p className="font-sans text-sm text-[#666] max-w-md leading-relaxed">
+        <p className="font-sans text-sm md:text-base text-white/80 max-w-md leading-relaxed font-medium">
           Full-stack developer & data science enthusiast, crafting digital
           products with clean code and thoughtful interfaces.
         </p>
 
         <motion.a
           href="#work"
-          className="flex items-center gap-2 font-mono text-[11px] tracking-widest uppercase text-[#999] hover:text-[#111] transition-colors group"
+          className="flex items-center gap-3 font-mono text-xs tracking-widest uppercase text-white/70 hover:text-white transition-colors group"
           data-cursor-hover
-          data-cursor-label="↓"
-          whileHover={{ x: 0 }}
+          data-cursor-label="Explore"
         >
-          <span>Scroll to explore</span>
-          <motion.span
-            animate={{ y: [0, 4, 0] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
-            className="text-sm"
+          <span>Scroll down</span>
+          <motion.div
+            animate={{ y: [0, 8, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+            className="w-8 h-12 rounded-full border border-white/30 flex justify-center p-1 relative"
           >
-            ↓
-          </motion.span>
+            <motion.div className="w-1 h-3 bg-white rounded-full mt-1" />
+          </motion.div>
         </motion.a>
       </motion.div>
     </section>

@@ -43,7 +43,7 @@ function ProjectItem({
       initial={{ opacity: 0, y: 40 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
       transition={{
-        duration: 0.7,
+        duration: 0.8,
         delay: index * 0.1,
         ease: [0.16, 1, 0.3, 1],
       }}
@@ -52,7 +52,7 @@ function ProjectItem({
         href={project.link}
         target="_blank"
         rel="noopener noreferrer"
-        className="group block py-8 md:py-10 border-b border-[#e0e0e0] relative"
+        className="group block py-10 md:py-16 border-b border-[#111]/10 relative overflow-hidden"
         onMouseEnter={() => !isMobile && setIsHovered(true)}
         onMouseLeave={() => !isMobile && setIsHovered(false)}
         onMouseMove={handleMouseMove}
@@ -60,38 +60,46 @@ function ProjectItem({
         data-cursor-hover
         data-cursor-label="View"
       >
-        <div className="flex items-start md:items-center justify-between gap-4">
-          <div className="flex items-start md:items-center gap-4 md:gap-8 flex-1">
+        {/* Hover background color transition */}
+        <motion.div 
+          className="absolute inset-0 bg-[#2A4CFF]/5 -z-10 origin-bottom"
+          initial={{ scaleY: 0 }}
+          animate={{ scaleY: isHovered && !isMobile ? 1 : 0 }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        />
+
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 md:gap-4 relative z-10 px-4 md:px-0">
+          <div className="flex items-start md:items-center gap-6 md:gap-12 flex-1">
             {/* Number */}
-            <span className="font-mono text-[11px] text-[#999] tracking-wider mt-2 md:mt-0">
-              {String(index + 1).padStart(2, "0")}
+            <span className="font-mono text-sm md:text-base text-[#999] tracking-wider mt-2 md:mt-0 opacity-50 group-hover:opacity-100 transition-opacity">
+              /{String(index + 1).padStart(2, "0")}
             </span>
 
-            {/* Title & Category */}
+            {/* Title */}
             <div className="flex-1">
-              <h3 className="font-display text-2xl md:text-4xl lg:text-5xl font-bold tracking-tight group-hover:text-[#2A4CFF] transition-colors duration-300">
+              <h3 className="font-display text-[#111] text-4xl md:text-6xl lg:text-7xl font-bold tracking-tighter group-hover:text-[#2A4CFF] group-hover:translate-x-4 transition-all duration-500 ease-[0.16,1,0.3,1]">
                 {project.title}
               </h3>
             </div>
           </div>
 
           {/* Category & Year */}
-          <div className="flex items-center gap-4 md:gap-8 shrink-0">
-            <span className="font-mono text-[11px] text-[#999] tracking-wider uppercase hidden md:inline">
+          <div className="flex items-center gap-8 md:gap-12 shrink-0 self-start md:self-auto mt-2 md:mt-0">
+            <span className="font-mono text-xs text-[#666] tracking-widest uppercase hidden md:inline">
               {project.category}
             </span>
-            <span className="font-mono text-[11px] text-[#999] tracking-wider">
+            <span className="font-mono text-xs text-[#666] tracking-widest">
               {project.year}
             </span>
 
             {/* Arrow */}
-            <motion.span
-              className="text-[#999] group-hover:text-[#2A4CFF] transition-colors duration-300"
-              animate={{ x: isHovered ? 5 : 0 }}
-              transition={{ duration: 0.3 }}
+            <motion.div
+              className="w-10 h-10 rounded-full border border-[#111]/20 flex items-center justify-center text-[#111] group-hover:bg-[#2A4CFF] group-hover:text-white group-hover:border-[#2A4CFF] transition-colors duration-300"
+              animate={{ rotate: isHovered ? 45 : 0 }}
+              transition={{ duration: 0.4, ease: "backOut" }}
             >
-              →
-            </motion.span>
+              ↗
+            </motion.div>
           </div>
         </div>
 
@@ -103,10 +111,10 @@ function ProjectItem({
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-              className="overflow-hidden mt-4"
+              className="overflow-hidden mt-6 px-4"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="relative w-full aspect-[16/10] rounded-md overflow-hidden">
+              <div className="relative w-full aspect-[16/10] rounded-xl overflow-hidden shadow-lg">
                 <Image
                   src={project.image}
                   alt={project.title}
@@ -115,14 +123,14 @@ function ProjectItem({
                   sizes="(max-width: 768px) 100vw, 50vw"
                 />
               </div>
-              <p className="text-sm text-[#666] mt-3 leading-relaxed">
+              <p className="text-sm text-[#444] mt-5 leading-relaxed font-medium">
                 {project.description}
               </p>
-              <div className="flex gap-2 mt-3 flex-wrap">
+              <div className="flex gap-2 mt-4 flex-wrap">
                 {project.tech.map((t) => (
                   <span
                     key={t}
-                    className="font-mono text-[10px] px-2 py-1 bg-[#f0f0ee] rounded text-[#666] tracking-wide"
+                    className="font-mono text-[10px] px-3 py-1 bg-white border border-[#111]/10 rounded-full text-[#666] tracking-widest uppercase"
                   >
                     {t}
                   </span>
@@ -136,22 +144,25 @@ function ProjectItem({
         <AnimatePresence>
           {!isMobile && isHovered && (
             <motion.div
-              className="project-image-follow"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              className="project-image-follow shadow-2xl z-50 pointer-events-none fixed"
+              initial={{ opacity: 0, scale: 0.6, rotate: -5 }}
+              animate={{ opacity: 1, scale: 1, rotate: 0 }}
+              exit={{ opacity: 0, scale: 0.6, rotate: 5 }}
+              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
               style={{
-                left: mousePos.x + 20,
-                top: mousePos.y - 110,
+                left: mousePos.x + 40,
+                top: mousePos.y - 150,
+                width: "400px",
+                height: "250px",
+                borderRadius: "8px",
+                overflow: "hidden"
               }}
             >
               <Image
                 src={project.image}
                 alt={project.title}
-                width={350}
-                height={220}
-                className="w-full h-full object-cover"
+                fill
+                className="object-cover"
               />
             </motion.div>
           )}
@@ -169,38 +180,41 @@ export default function ProjectsSection() {
     <section
       ref={sectionRef}
       id="work"
-      className="px-6 md:px-10 py-20 md:py-32"
+      className="px-6 md:px-10 py-24 md:py-40 bg-[#FAFAF9] text-[#111]"
     >
-      {/* Section header */}
-      <div className="flex items-end justify-between mb-12 md:mb-16">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={titleInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-        >
-          <span className="font-mono text-[11px] text-[#999] tracking-widest uppercase block mb-3">
-            Selected Work
-          </span>
-          <h2 className="font-display text-4xl md:text-6xl font-bold tracking-tight">
-            Projects
-          </h2>
-        </motion.div>
+      <div className="max-w-[1800px] mx-auto">
+        {/* Section header */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 md:mb-24 gap-6">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={titleInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <h2 className="font-display text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter leading-none text-[#111]">
+              Featured<br/>
+              <span className="text-[#2A4CFF]">Projects.</span>
+            </h2>
+          </motion.div>
 
-        <motion.span
-          className="font-mono text-[11px] text-[#999] tracking-wider"
-          initial={{ opacity: 0 }}
-          animate={titleInView ? { opacity: 1 } : {}}
-          transition={{ delay: 0.3, duration: 0.5 }}
-        >
-          ({String(projects.length).padStart(2, "0")})
-        </motion.span>
-      </div>
+          <motion.div
+            className="flex items-center gap-4"
+            initial={{ opacity: 0 }}
+            animate={titleInView ? { opacity: 1 } : {}}
+            transition={{ delay: 0.3, duration: 0.5 }}
+          >
+            <div className="w-12 h-[1px] bg-[#111]" />
+            <span className="font-mono text-xs text-[#111] tracking-widest font-bold">
+              ({String(projects.length).padStart(2, "0")})
+            </span>
+          </motion.div>
+        </div>
 
-      {/* Project list */}
-      <div className="border-t border-[#e0e0e0]">
-        {projects.map((project, index) => (
-          <ProjectItem key={project.id} project={project} index={index} />
-        ))}
+        {/* Project list */}
+        <div className="border-t-2 border-[#111]">
+          {projects.map((project, index) => (
+            <ProjectItem key={project.id} project={project} index={index} />
+          ))}
+        </div>
       </div>
     </section>
   );

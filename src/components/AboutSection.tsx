@@ -12,132 +12,114 @@ export default function AboutSection() {
     <section
       ref={sectionRef}
       id="about"
-      className="px-6 md:px-10 py-20 md:py-32"
+      className="px-6 md:px-10 py-24 md:py-40 bg-[#111] text-[#FAFAF9] overflow-hidden relative"
     >
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-16">
-        {/* Left column - Label + Image */}
-        <div className="md:col-span-4">
-          <motion.span
-            className="font-mono text-[11px] text-[#999] tracking-widest uppercase block mb-6"
-            initial={{ opacity: 0 }}
-            animate={isInView ? { opacity: 1 } : {}}
-            transition={{ duration: 0.5 }}
-          >
-            About
-          </motion.span>
+      <div className="max-w-[1800px] mx-auto relative z-10">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-12 md:gap-20 items-center">
+          
+          {/* Left column - Image with floating animation */}
+          <div className="md:col-span-5 relative">
+            <motion.div
+              className="relative aspect-[3/4] w-full max-w-[500px] mx-auto md:mr-auto rounded-2xl overflow-hidden shadow-2xl"
+              initial={{ opacity: 0, y: 50, rotate: -5 }}
+              animate={isInView ? { opacity: 1, y: 0, rotate: -2 } : {}}
+              transition={{
+                duration: 1,
+                ease: [0.16, 1, 0.3, 1],
+              }}
+              whileHover={{ rotate: 0, scale: 1.02 }}
+            >
+              <Image
+                src="/assests/tangan.png"
+                alt="Andhika Rafi"
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 50vw"
+              />
+              <div className="absolute inset-0 bg-black/10 mix-blend-multiply" />
+            </motion.div>
 
-          <motion.div
-            className="relative aspect-[3/4] w-full max-w-sm rounded-md overflow-hidden bg-[#eeede9]"
-            initial={{ opacity: 0, y: 30 }}
-            animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{
-              duration: 0.7,
-              delay: 0.2,
-              ease: [0.16, 1, 0.3, 1],
-            }}
-          >
-            <Image
-              src="/assests/tangan.png"
-              alt="Andhika Rafi"
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, 33vw"
+            {/* Decorative element */}
+            <motion.div 
+              className="absolute -bottom-10 -right-10 w-40 h-40 bg-[#DFF25C] rounded-full blur-3xl opacity-20"
+              animate={{ 
+                scale: [1, 1.2, 1],
+                opacity: [0.2, 0.3, 0.2]
+              }}
+              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
             />
-          </motion.div>
-        </div>
-
-        {/* Right column - Text */}
-        <div className="md:col-span-7 md:col-start-6 flex flex-col justify-center">
-          <motion.h2
-            className="font-display text-3xl md:text-5xl font-bold tracking-tight mb-8"
-            initial={{ opacity: 0, y: 30 }}
-            animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{
-              duration: 0.7,
-              delay: 0.1,
-              ease: [0.16, 1, 0.3, 1],
-            }}
-          >
-            Building things that
-            <br />
-            <span className="text-[#2A4CFF]">work well</span> and
-            <br />
-            look right.
-          </motion.h2>
-
-          <div className="space-y-5">
-            <motion.p
-              className="text-[#444] leading-relaxed text-base"
-              initial={{ opacity: 0, y: 20 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: 0.3 }}
-            >
-              Saya Andhika — kebanyakan orang panggil Dhika. Saya mulai ngoding
-              dari rasa penasaran yang sederhana: bagaimana sih halaman web bisa
-              jalan? Pertanyaan itu terus berkembang, dan sekarang sudah jadi
-              rutinitas harian saya membangun aplikasi web dari depan sampai
-              belakang. Saat ini saya fokus di full-stack development pakai
-              Laravel, React, dan Next.js, sambil terus eksplorasi hal-hal baru
-              di bidang data science.
-            </motion.p>
-
-            <motion.p
-              className="text-[#444] leading-relaxed text-base"
-              initial={{ opacity: 0, y: 20 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: 0.4 }}
-            >
-              Yang paling saya suka dari proses development itu momen ketika
-              sebuah fitur akhirnya berjalan mulus — mulai dari desain API yang
-              rapi, query database yang efisien, sampai tampilan antarmuka yang
-              terasa responsive dan nyaman dipakai. Saya selalu berusaha bikin
-              kode yang bersih dan arsitektur yang bisa di-scale, karena menurut
-              saya kualitas kode itu sama pentingnya dengan hasil akhirnya.
-            </motion.p>
-
-            <motion.p
-              className="text-[#444] leading-relaxed text-base"
-              initial={{ opacity: 0, y: 20 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: 0.5 }}
-            >
-              Di luar coding, saya senang ikut hackathon dan kolaborasi bareng
-              developer lain — di situ saya belajar paling banyak. Saya percaya
-              produk digital yang bagus itu lahir dari perhatian terhadap detail:
-              mau itu soal UI yang konsisten, flow UX yang intuitif, atau
-              backend yang solid di belakang layar.
-            </motion.p>
           </div>
 
-          {/* Skills tags */}
-          <motion.div
-            className="flex flex-wrap gap-2 mt-8"
-            initial={{ opacity: 0 }}
-            animate={isInView ? { opacity: 1 } : {}}
-            transition={{ duration: 0.5, delay: 0.6 }}
-          >
-            {[
-              "Laravel",
-              "React",
-              "Next.js",
-              "TypeScript",
-              "Vue.js",
-              "PHP",
-              "Python",
-              "MySQL",
-              "REST API",
-              "Tailwind CSS",
-              "Git",
-              "Data Science",
-            ].map((skill) => (
-              <span
-                key={skill}
-                className="font-mono text-[10px] px-3 py-1.5 border border-[#e0e0e0] rounded-full text-[#666] tracking-wide hover:border-[#2A4CFF] hover:text-[#2A4CFF] transition-colors duration-300"
+          {/* Right column - Text */}
+          <div className="md:col-span-7 flex flex-col justify-center relative">
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              animate={isInView ? { opacity: 1, x: 0 } : {}}
+              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <h2 className="font-display text-4xl md:text-6xl lg:text-7xl font-bold tracking-tighter mb-8 leading-[1.1]">
+                Building things that <br/>
+                <span className="text-[#DFF25C] italic">work well</span> & <br/>
+                look right.
+              </h2>
+            </motion.div>
+
+            <div className="space-y-6 max-w-2xl">
+              <motion.p
+                className="text-[#FAFAF9]/80 leading-relaxed text-lg md:text-xl font-medium"
+                initial={{ opacity: 0, y: 20 }}
+                animate={isInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.6, delay: 0.2 }}
               >
-                {skill}
-              </span>
-            ))}
-          </motion.div>
+                Saya Andhika — kebanyakan orang panggil Dhika. Saya mulai ngoding
+                dari rasa penasaran yang sederhana: bagaimana sih halaman web bisa
+                jalan? Pertanyaan itu terus berkembang, dan sekarang sudah jadi
+                rutinitas harian saya membangun aplikasi web dari depan sampai
+                belakang.
+              </motion.p>
+
+              <motion.p
+                className="text-[#FAFAF9]/70 leading-relaxed text-base"
+                initial={{ opacity: 0, y: 20 }}
+                animate={isInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.6, delay: 0.3 }}
+              >
+                Yang paling saya suka dari proses development itu momen ketika
+                sebuah fitur akhirnya berjalan mulus — mulai dari desain API yang
+                rapi, query database yang efisien, sampai tampilan antarmuka yang
+                terasa responsive dan nyaman dipakai. Saya selalu berusaha bikin
+                kode yang bersih dan arsitektur yang bisa di-scale.
+              </motion.p>
+            </div>
+
+            {/* Skills tags */}
+            <motion.div
+              className="flex flex-wrap gap-3 mt-12"
+              initial={{ opacity: 0, y: 20 }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.5, delay: 0.4 }}
+            >
+              {[
+                "Laravel",
+                "React",
+                "Next.js",
+                "TypeScript",
+                "Data Science",
+                "Tailwind CSS",
+              ].map((skill, i) => (
+                <motion.span
+                  key={skill}
+                  className="font-mono text-xs px-4 py-2 bg-[#FAFAF9]/10 rounded-full text-[#FAFAF9] tracking-widest uppercase backdrop-blur-sm border border-[#FAFAF9]/20"
+                  whileHover={{ backgroundColor: "#DFF25C", color: "#111", borderColor: "#DFF25C" }}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={isInView ? { opacity: 1, scale: 1 } : {}}
+                  transition={{ delay: 0.4 + i * 0.05 }}
+                >
+                  {skill}
+                </motion.span>
+              ))}
+            </motion.div>
+          </div>
         </div>
       </div>
     </section>
