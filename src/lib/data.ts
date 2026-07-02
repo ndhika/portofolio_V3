@@ -67,6 +67,25 @@ export const projects = [
   },
 ];
 
+export const education = [
+  {
+    id: 1,
+    degree: "S1 — Informatika",
+    school: "Universitas AMIKOM Yogyakarta",
+    year: "2023 — Present",
+    description:
+      "Focusing on Software Engineering and Data Science. Active in campus tech communities and hackathon events.",
+  },
+  {
+    id: 2,
+    degree: "SMA — IPA",
+    school: "SMAN 1 Getas",
+    year: "2020 — 2023",
+    description:
+      "Built a foundation in logical thinking and problem-solving through mathematics and natural sciences.",
+  },
+];
+
 export const socialLinks = [
   {
     name: "GitHub",

@@ -4,11 +4,11 @@ import dynamic from "next/dynamic";
 import SmoothScroll from "@/components/SmoothScroll";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
-import ProjectsSection from "@/components/ProjectsSection";
 import AboutSection from "@/components/AboutSection";
+import EducationSection from "@/components/EducationSection";
 import ContactSection from "@/components/ContactSection";
-import Marquee from "@/components/Marquee";
-import NoiseFilter from "@/components/NoiseFilter";
+import WaveDivider from "@/components/WaveDivider";
+import Preloader from "@/components/Preloader";
 
 const CustomCursor = dynamic(() => import("@/components/CustomCursor"), {
   ssr: false,
@@ -16,19 +16,21 @@ const CustomCursor = dynamic(() => import("@/components/CustomCursor"), {
 
 export default function Home() {
   return (
-    <SmoothScroll>
-      <NoiseFilter />
-      <CustomCursor />
-      <Navbar />
-      <main>
-        <Hero />
-        <Marquee text="Selected Work" speed={20} />
-        <ProjectsSection />
-        <Marquee text="About Me" speed={25} />
-        <AboutSection />
-        <Marquee text="Let's Talk" speed={15} />
-        <ContactSection />
-      </main>
-    </SmoothScroll>
+    <>
+      <Preloader />
+      <SmoothScroll>
+        <CustomCursor />
+        <Navbar />
+        <main>
+          <Hero />
+          <WaveDivider fill="#111" bgFill="#0a0a0a" />
+          <AboutSection />
+          <WaveDivider fill="#0d1117" bgFill="#111" />
+          <EducationSection />
+          <WaveDivider fill="#0a0a0a" bgFill="#0d1117" />
+          <ContactSection />
+        </main>
+      </SmoothScroll>
+    </>
   );
 }

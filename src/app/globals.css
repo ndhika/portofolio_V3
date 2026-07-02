@@ -1,137 +1,95 @@
 @import "tailwindcss";
 
 @theme {
-  --color-background: #FAFAF9;
-  --color-foreground: #111111;
-  --color-accent: #2A4CFF;
-  --color-lime: #DFF25C;
-  --font-sans: var(--font-inter);
-  --font-display: var(--font-space-grotesk);
-  --font-mono: var(--font-jetbrains-mono);
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-display: "Space Grotesk", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
 }
 
-:root {
-  --background: #FAFAF9;
-  --foreground: #111111;
-  --accent: #2A4CFF;
-  --lime: #DFF25C;
-}
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
+/* ===== BASE ===== */
 html {
-  scroll-behavior: auto; /* Lenis handles smooth scroll */
-}
-
-html.lenis, html.lenis body {
-  height: auto;
-}
-
-.lenis.lenis-smooth {
-  scroll-behavior: auto;
-}
-
-.lenis.lenis-smooth [data-lenis-prevent] {
-  overscroll-behavior: contain;
+  scroll-behavior: smooth;
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
+  background: #0a0a0a;
+  color: #fafaf9;
   overflow-x: hidden;
+  cursor: none;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 ::selection {
-  background-color: var(--accent);
-  color: #fff;
+  background: #2a4cff;
+  color: #fafaf9;
 }
 
-/* Focus states for keyboard navigation */
-*:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 3px;
-  border-radius: 2px;
+/* Utility */
+.writing-vertical {
+  writing-mode: vertical-rl;
 }
 
-/* Respect reduced motion */
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-}
-
-/* Custom cursor hide on mobile */
-@media (pointer: coarse) {
-  .custom-cursor {
-    display: none !important;
-  }
-}
-
-/* Hide default cursor when custom cursor is active */
-.cursor-none * {
-  cursor: none !important;
-}
-
-/* Monospace label style */
-.mono-label {
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #999;
-}
-
-/* Hero name oversized */
-.hero-name {
-  font-size: clamp(3.5rem, 12vw, 13rem);
-  line-height: 0.9;
-  letter-spacing: -0.04em;
-  font-weight: 700;
-}
-
-/* Horizontal rule style */
-.hr-accent {
-  height: 1px;
-  background: #e0e0e0;
-  border: none;
-  width: 100%;
-}
-
-/* Project hover image */
-.project-image-follow {
-  pointer-events: none;
-  position: fixed;
-  z-index: 50;
-  width: 350px;
-  height: 220px;
-  object-fit: cover;
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-/* Scrollbar minimal */
+/* ===== SCROLLBAR ===== */
 ::-webkit-scrollbar {
   width: 4px;
 }
-
 ::-webkit-scrollbar-track {
   background: transparent;
 }
-
 ::-webkit-scrollbar-thumb {
-  background: #ccc;
-  border-radius: 4px;
+  background: #333;
+  border-radius: 999px;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #aaa;
+/* ===== SVG WAVE TRANSITIONS ===== */
+.wave-divider {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  line-height: 0;
+}
+.wave-divider svg {
+  position: relative;
+  display: block;
+  width: calc(100% + 2px);
+  height: 120px;
+}
+.wave-divider-flip {
+  transform: rotate(180deg);
+}
+
+/* ===== SECTION REVEALS ===== */
+.reveal-up {
+  opacity: 0;
+  transform: translateY(80px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal-up.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ===== FLUID BLOB ===== */
+@keyframes morphBlob {
+  0%,100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+  25%     { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
+  50%     { border-radius: 50% 50% 40% 60% / 40% 50% 60% 50%; }
+  75%     { border-radius: 40% 60% 50% 50% / 60% 40% 50% 60%; }
+}
+.fluid-blob {
+  animation: morphBlob 12s ease-in-out infinite;
+}
+
+/* ===== SNAKE PATH ===== */
+@keyframes dashOffset {
+  to { stroke-dashoffset: 0; }
+}
+.snake-path {
+  stroke-dasharray: 2000;
+  stroke-dashoffset: 2000;
+}
+.snake-path.animate {
+  animation: dashOffset 3s ease forwards;
 }
