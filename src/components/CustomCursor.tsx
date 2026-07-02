@@ -7,6 +7,7 @@ export default function CustomCursor() {
   const [isHovering, setIsHovering] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [hoverLabel, setHoverLabel] = useState("");
+  const [isMounted, setIsMounted] = useState(false);
 
   const cursorX = useMotionValue(-100);
   const cursorY = useMotionValue(-100);
@@ -25,6 +26,8 @@ export default function CustomCursor() {
   );
 
   useEffect(() => {
+    setIsMounted(true);
+
     // Only show custom cursor on non-touch devices
     const isTouch = window.matchMedia("(pointer: coarse)").matches;
     if (isTouch) return;
@@ -78,50 +81,40 @@ export default function CustomCursor() {
     };
   }, [handleMouseMove]);
 
-  if (typeof window !== "undefined") {
-    const isTouch = window.matchMedia("(pointer: coarse)").matches;
-    if (isTouch) return null;
-  }
+  if (!isMounted) return null;
 
   return (
-    <>
-      {/* Main dot */}
+    <motion.div
+      className="custom-cursor fixed top-0 left-0 pointer-events-none z-[9999]"
+      style={{
+        x: smoothX,
+        y: smoothY,
+      }}
+    >
       <motion.div
-        className="custom-cursor fixed top-0 left-0 pointer-events-none z-[9999]"
+        className="relative flex items-center justify-center rounded-full"
         style={{
-          x: smoothX,
-          y: smoothY,
+          transform: "translate(-50%, -50%)",
+          opacity: isVisible ? 1 : 0,
         }}
+        animate={{
+          width: isHovering ? 64 : 10,
+          height: isHovering ? 64 : 10,
+          backgroundColor: isHovering ? "#2A4CFF" : "#111111",
+        }}
+        transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
       >
-        <motion.div
-          className="relative flex items-center justify-center"
-          style={{ transform: "translate(-50%, -50%)" }}
-          animate={{
-            width: isHovering ? 64 : 10,
-            height: isHovering ? 64 : 10,
-            backgroundColor: isHovering ? "#2A4CFF" : "#111111",
-            mixBlendMode: isHovering ? "normal" : "difference",
-          }}
-          transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-          initial={false}
-          style={{
-            transform: "translate(-50%, -50%)",
-            borderRadius: "50%",
-            opacity: isVisible ? 1 : 0,
-          }}
-        >
-          {hoverLabel && (
-            <motion.span
-              initial={{ opacity: 0, scale: 0.5 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.5 }}
-              className="text-white text-[10px] font-mono font-medium tracking-wider uppercase"
-            >
-              {hoverLabel}
-            </motion.span>
-          )}
-        </motion.div>
+        {hoverLabel && isHovering && (
+          <motion.span
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.5 }}
+            className="text-white text-[10px] font-mono font-medium tracking-wider uppercase"
+          >
+            {hoverLabel}
+          </motion.span>
+        )}
       </motion.div>
-    </>
+    </motion.div>
   );
 }
