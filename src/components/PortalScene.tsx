@@ -2,7 +2,7 @@
 
 import { useRef, Suspense } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Float, Environment, MeshTransmissionMaterial } from "@react-three/drei";
+import { Float, Environment, MeshTransmissionMaterial, OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 
 // Abstract floating sphere clusters
@@ -41,7 +41,7 @@ function AbstractSphere({ position, scale, speed }: {
 
 export default function PortalScene() {
   return (
-    <div className="absolute inset-0 z-0 pointer-events-none">
+    <div className="absolute inset-0 z-0">
       <Suspense fallback={null}>
         <Canvas
           camera={{ position: [0, 0, 6], fov: 40 }}
@@ -58,6 +58,14 @@ export default function PortalScene() {
           <AbstractSphere position={[2, -0.5, -1]} scale={0.7} speed={0.6} />
           <AbstractSphere position={[0, 0, -2]} scale={1.8} speed={0.25} />
 
+          <OrbitControls 
+            enableZoom={false}
+            enablePan={false}
+            maxPolarAngle={Math.PI / 2 + 0.4}
+            minPolarAngle={Math.PI / 2 - 0.4}
+            maxAzimuthAngle={Math.PI / 4}
+            minAzimuthAngle={-Math.PI / 4}
+          />
           <Environment preset="night" />
         </Canvas>
       </Suspense>

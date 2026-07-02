@@ -87,7 +87,7 @@ export default function WorksTeaser() {
               </span>
             </h2>
           </div>
-          <MagneticButton href="/work">View All Work ↗</MagneticButton>
+          <MagneticButton href="/works">View All Work ↗</MagneticButton>
         </div>
 
         {/* Project cards — asymmetric layout */}
@@ -104,7 +104,7 @@ export default function WorksTeaser() {
             return (
               <Link
                 key={project.id}
-                href={`/work#${project.id}`}
+                href={`/works/${project.slug}`}
                 className={`teaser-card project-card group relative block overflow-hidden rounded-sm ${colSpan}`}
                 onMouseEnter={() => setHoverId(project.id)}
                 onMouseLeave={() => setHoverId(null)}

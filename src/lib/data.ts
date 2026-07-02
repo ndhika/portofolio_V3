@@ -9,6 +9,7 @@ export const projects = [
     tech: ["JavaScript", "Canvas API", "Vite"],
     image: "/assests/aero.png",
     link: "https://aero-ballistics-physics.vercel.app",
+    slug: "aeroballistics",
   },
   {
     id: 2,
@@ -20,6 +21,7 @@ export const projects = [
     tech: ["Laravel", "PHP", "Blade", "Tailwind CSS"],
     image: "/assests/nufaisyah.png",
     link: "https://github.com/ndhika/Nufaisyastore",
+    slug: "nufaisya-store",
   },
   {
     id: 3,
@@ -31,6 +33,7 @@ export const projects = [
     tech: ["TypeScript", "Next.js", "AI"],
     image: "/assests/hackthon.png",
     link: "https://github.com/ndhika/EVENT-IMPHNEN-HEKATON",
+    slug: "hackathon-imphnen",
   },
   {
     id: 4,
@@ -42,6 +45,7 @@ export const projects = [
     tech: ["React", "CSS", "Responsive Design"],
     image: "/assests/gadiza.png",
     link: "#",
+    slug: "gadiza",
   },
   {
     id: 5,
@@ -53,6 +57,7 @@ export const projects = [
     tech: ["Laravel", "MySQL", "Tailwind CSS"],
     image: "/assests/zicare.png",
     link: "#",
+    slug: "zicare",
   },
   {
     id: 6,
@@ -64,6 +69,7 @@ export const projects = [
     tech: ["TypeScript", "React", "Node.js"],
     image: "/assests/tmjx.png",
     link: "#",
+    slug: "tmjx",
   },
 ];
 

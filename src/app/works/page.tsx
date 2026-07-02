@@ -133,8 +133,7 @@ export default function WorkPage() {
               return (
                 <Link
                   key={project.id}
-                  href={project.link || "#"}
-                  target={project.link?.startsWith("http") ? "_blank" : undefined}
+                  href={`/works/${project.slug}`}
                   rel="noopener noreferrer"
                   className={`work-card project-card group relative overflow-hidden rounded-sm ${layout}`}
                   onMouseEnter={() => setHovered(project.id)}

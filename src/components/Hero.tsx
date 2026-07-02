@@ -4,6 +4,9 @@ import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import MagneticButton from "./MagneticButton";
+import dynamic from "next/dynamic";
+
+const HeroScene = dynamic(() => import("./HeroScene"), { ssr: false });
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -84,6 +87,8 @@ export default function Hero() {
         01
       </span>
 
+      <HeroScene />
+
       <div
         ref={headlineRef}
         className="relative z-10 px-6 md:px-12 lg:px-20 pb-16 md:pb-24"
@@ -152,7 +157,7 @@ export default function Hero() {
             Building scalable web applications with
             clean architecture and thoughtful craft.
           </p>
-          <MagneticButton href="/work">
+          <MagneticButton href="/works">
             View Work ↗
           </MagneticButton>
         </div>

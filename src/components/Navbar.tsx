@@ -17,7 +17,7 @@ export default function Navbar() {
   }, []);
 
   const links = [
-    { label: "Work", href: "/work" },
+    { label: "Work", href: "/works" },
     { label: "About", href: "/#about" },
     { label: "Contact", href: "/#contact" },
   ];
