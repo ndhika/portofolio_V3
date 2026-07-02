@@ -19,7 +19,7 @@ function BlurText({ text, delay = 0, className = "" }: { text: string; delay?: n
           transition={{
             duration: 1,
             delay: delay + index * 0.05,
-            ease: [0.25, 0.1, 0.25, 1], // Custom smooth ease
+            ease: [0.25, 0.1, 0.25, 1],
           }}
           className={`inline-block ${className}`}
         >
@@ -39,7 +39,7 @@ function RepellingParticles({ count, color, size, depth = 10 }: { count: number;
     for (let i = 0; i < count; i++) {
       const x = (Math.random() - 0.5) * 20;
       const y = (Math.random() - 0.5) * 20;
-      const z = (Math.random() - 0.5) * depth - 2; // Offset backward slightly
+      const z = (Math.random() - 0.5) * depth - 2;
       temp.push({ x, y, z, baseX: x, baseY: y, baseZ: z });
     }
     return temp;
@@ -188,7 +188,7 @@ export default function Hero() {
 
       <Decorations isLoading={isLoading} />
 
-      <div className="z-10 flex flex-col items-center text-center px-4 w-full pointer-events-none mt-16 mix-blend-difference">
+      <div className="z-10 flex flex-col items-center text-center px-4 w-full pointer-events-none mix-blend-difference">
         <div className="flex flex-wrap justify-center gap-x-3 md:gap-x-6 overflow-hidden">
           {!isLoading && <BlurText text="ANDHIKA" delay={0.2} className="text-6xl md:text-8xl lg:text-[10rem] font-sans font-bold tracking-tighter text-white uppercase" />}
         </div>
@@ -213,12 +213,12 @@ export default function Hero() {
         initial={{ opacity: 0, filter: "blur(10px)" }}
         animate={isLoading ? { opacity: 0, filter: "blur(10px)" } : { opacity: 1, filter: "blur(0px)" }}
         transition={{ duration: 1, delay: 1.5 }}
-        className="absolute bottom-10 z-10 flex flex-col items-center gap-4 pointer-events-none"
+        className="absolute bottom-2 md:bottom-4 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2 md:gap-3 pointer-events-none mix-blend-difference"
       >
-        <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-neutral-400">
+        <span className="text-[9px] md:text-[10px] font-medium uppercase tracking-[0.4em] text-white/50">
           Scroll to explore
         </span>
-        <div className="h-12 w-[1px] bg-neutral-900/20 overflow-hidden">
+        <div className="h-8 md:h-12 w-[1px] bg-white/20 overflow-hidden relative">
           <motion.div
             animate={{
               y: ["-100%", "100%"],
@@ -228,7 +228,7 @@ export default function Hero() {
               repeat: Infinity,
               ease: "linear",
             }}
-            className="h-full w-full bg-neutral-900"
+            className="h-full w-full bg-white absolute inset-0"
           />
         </div>
       </motion.div>
