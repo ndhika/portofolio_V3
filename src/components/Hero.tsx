@@ -1,163 +1,179 @@
 "use client";
 
-import { useRef, useMemo } from "react";
+import { useRef, useMemo, useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Canvas, useFrame, extend, useThree } from "@react-three/fiber";
-import { shaderMaterial } from "@react-three/drei";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { Float, MeshTransmissionMaterial, Environment } from "@react-three/drei";
 import * as THREE from "three";
 
-const FluidMaskMaterial = shaderMaterial(
-  {
-    uTime: 0,
-    uMouse: new THREE.Vector2(0, 0),
-    uResolution: new THREE.Vector2(1, 1),
-  },
-  // vertex shader
-  `
-    varying vec2 vUv;
-    void main() {
-      vUv = uv;
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+// --- ReactBits Style Text Animation ---
+function BlurText({ text, delay = 0, className = "" }: { text: string; delay?: number; className?: string }) {
+  const characters = text.split("");
+  return (
+    <div className="flex">
+      {characters.map((char, index) => (
+        <motion.span
+          key={index}
+          initial={{ filter: "blur(10px)", opacity: 0, y: 20, scale: 0.8 }}
+          animate={{ filter: "blur(0px)", opacity: 1, y: 0, scale: 1 }}
+          transition={{
+            duration: 1,
+            delay: delay + index * 0.05,
+            ease: [0.25, 0.1, 0.25, 1], // Custom smooth ease
+          }}
+          className={`inline-block ${className}`}
+        >
+          {char === " " ? "\u00A0" : char}
+        </motion.span>
+      ))}
+    </div>
+  );
+}
+
+// --- Interactive Repelling Particles ---
+function RepellingParticles({ count, color, size, depth = 10 }: { count: number; color: string; size: number; depth?: number }) {
+  const mesh = useRef<THREE.InstancedMesh>(null);
+  const dummy = useMemo(() => new THREE.Object3D(), []);
+  
+  const particles = useMemo(() => {
+    const temp = [];
+    for (let i = 0; i < count; i++) {
+      const x = (Math.random() - 0.5) * 20;
+      const y = (Math.random() - 0.5) * 20;
+      const z = (Math.random() - 0.5) * depth - 2; // Offset backward slightly
+      temp.push({ x, y, z, baseX: x, baseY: y, baseZ: z });
     }
-  `,
-  // fragment shader
-  `
-    varying vec2 vUv;
-    uniform float uTime;
-    uniform vec2 uMouse;
-    uniform vec2 uResolution;
-
-    // Simplex noise function
-    vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
-    vec2 mod289(vec2 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
-    vec3 permute(vec3 x) { return mod289(((x*34.0)+1.0)*x); }
-    float snoise(vec2 v) {
-      const vec4 C = vec4(0.211324865405187,  0.366025403784439, -0.577350269189626, 0.024390243902439);
-      vec2 i  = floor(v + dot(v, C.yy) );
-      vec2 x0 = v -   i + dot(i, C.xx);
-      vec2 i1;
-      i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
-      vec4 x12 = x0.xyxy + C.xxzz;
-      x12.xy -= i1;
-      i = mod289(i);
-      vec3 p = permute( permute( i.y + vec3(0.0, i1.y, 1.0 )) + i.x + vec3(0.0, i1.x, 1.0 ));
-      vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy), dot(x12.zw,x12.zw)), 0.0);
-      m = m*m ;
-      m = m*m ;
-      vec3 x = 2.0 * fract(p * C.www) - 1.0;
-      vec3 h = abs(x) - 0.5;
-      vec3 ox = floor(x + 0.5);
-      vec3 a0 = x - ox;
-      m *= 1.79284291400159 - 0.85373472095314 * ( a0*a0 + h*h );
-      vec3 g;
-      g.x  = a0.x  * x0.x  + h.x  * x0.y;
-      g.yz = a0.yz * x12.xz + h.yz * x12.yw;
-      return 130.0 * dot(m, g);
-    }
-
-    void main() {
-      // Normalize UV to screen aspect ratio
-      vec2 st = vUv * 2.0 - 1.0;
-      st.x *= uResolution.x / uResolution.y;
-      
-      vec2 mouse = uMouse;
-      mouse.x *= uResolution.x / uResolution.y;
-
-      // Distance to mouse for interaction
-      vec2 dirToMouse = st - mouse;
-      float distToMouse = length(dirToMouse);
-      
-      // Repel effect: push space away from mouse
-      // The stronger the push, the further the water scatters into droplets
-      float push = smoothstep(1.0, 0.0, distToMouse) * 1.2;
-      vec2 pushVec = normalize(dirToMouse + vec2(0.0001)) * push;
-      
-      // Organic overall flow
-      float flowX = snoise(st * 1.5 + vec2(uTime * 0.2, 0.0)) * 0.1;
-      float flowY = snoise(st * 1.5 + vec2(0.0, uTime * 0.2)) * 0.1;
-      
-      // Warped coordinates: pushed by mouse and distorted by noise
-      vec2 warpedSt = st + pushVec + vec2(flowX, flowY);
-      
-      float distToCenter = length(warpedSt);
-      
-      // Base pool (increased volume for 'more water')
-      float pool = 1.0 / (distToCenter * distToCenter + 0.05);
-      
-      // High-frequency noise for droplets
-      // When the pool stretches (warps), this noise breaks it into scattered droplets
-      float n1 = snoise(warpedSt * 3.5 + uTime * 0.4);
-      float n2 = snoise(warpedSt * 7.0 - uTime * 0.3);
-      float droplets = n1 * 0.7 + n2 * 0.3;
-      
-      // Total field: combine pool and droplets
-      float field = pool + droplets * 1.2;
-      
-      // Add a hard hole exactly at the mouse to guarantee separation
-      field -= 0.5 / (distToMouse * distToMouse + 0.02);
-      
-      // Thresholds for rendering water
-      float waterThreshold = 1.5;
-      
-      // Seawater Blue colors
-      vec3 deepSea = vec3(0.0, 0.3, 0.7);
-      vec3 shallowSea = vec3(0.0, 0.7, 0.9);
-      vec3 waterColor = mix(deepSea, shallowSea, smoothstep(waterThreshold, waterThreshold + 2.0, field));
-      
-      // RGB Chromatic Aberration for glassy rim
-      float edgeR = smoothstep(waterThreshold - 0.2, waterThreshold, field - 0.1) - smoothstep(waterThreshold, waterThreshold + 0.2, field - 0.1);
-      float edgeG = smoothstep(waterThreshold - 0.2, waterThreshold, field)       - smoothstep(waterThreshold, waterThreshold + 0.2, field);
-      float edgeB = smoothstep(waterThreshold - 0.2, waterThreshold, field + 0.1) - smoothstep(waterThreshold, waterThreshold + 0.2, field + 0.1);
-      
-      // Add RGB glass rim
-      waterColor += vec3(edgeR, edgeG, edgeB) * 0.8;
-      
-      // Specular highlight (fake reflection on thick water)
-      float highlight = smoothstep(waterThreshold + 1.0, waterThreshold + 3.0, field);
-      waterColor += vec3(highlight) * 0.8;
-
-      // Alpha mask: hard edge at threshold
-      float alpha = smoothstep(waterThreshold - 0.1, waterThreshold, field);
-      
-      // Make it slightly transparent like water/glass
-      alpha *= 0.85; 
-
-      if (alpha < 0.01) discard; // Don't render empty pixels
-
-      gl_FragColor = vec4(waterColor, alpha);
-    }
-  `
-);
-extend({ FluidMaskMaterial });
-
-// @ts-expect-error - Custom element mapping for React Three Fiber
-const FluidMaterial = 'fluidMaskMaterial';
-
-function LiquidPool() {
-  const materialRef = useRef<any>(null);
-  const { viewport, size } = useThree();
+    return temp;
+  }, [count, depth]);
 
   useFrame((state) => {
-    if (materialRef.current) {
-      materialRef.current.uTime = state.clock.elapsedTime;
-      // Smoothly track mouse
-      materialRef.current.uMouse.lerp(new THREE.Vector2(state.pointer.x, state.pointer.y), 0.1);
-      materialRef.current.uResolution.set(size.width, size.height);
+    if (!mesh.current) return;
+    
+    // Project mouse to world coordinates (roughly)
+    const mouseX = (state.pointer.x * state.viewport.width) / 2;
+    const mouseY = (state.pointer.y * state.viewport.height) / 2;
+
+    particles.forEach((particle, i) => {
+      const dx = particle.x - mouseX;
+      const dy = particle.y - mouseY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      // Repel force: particles within radius of 4 get pushed away
+      const radius = 4;
+      if (dist < radius && dist > 0.1) {
+        const force = (radius - dist) / radius;
+        particle.x += (dx / dist) * force * 0.15;
+        particle.y += (dy / dist) * force * 0.15;
+      }
+
+      // Spring back to base position
+      particle.x += (particle.baseX - particle.x) * 0.02;
+      particle.y += (particle.baseY - particle.y) * 0.02;
+      
+      // Floating organic movement
+      const time = state.clock.elapsedTime;
+      const floatX = Math.sin(time * 0.5 + i) * 0.01;
+      const floatY = Math.cos(time * 0.5 + i) * 0.01;
+
+      dummy.position.set(particle.x + floatX, particle.y + floatY, particle.z);
+      
+      // Size pulsing
+      const scale = size * (1 + Math.sin(time * 2 + i) * 0.3);
+      dummy.scale.set(scale, scale, scale);
+      
+      dummy.updateMatrix();
+      mesh.current.setMatrixAt(i, dummy.matrix);
+    });
+    
+    mesh.current.instanceMatrix.needsUpdate = true;
+  });
+
+  return (
+    <instancedMesh ref={mesh} args={[undefined, undefined, count]}>
+      <sphereGeometry args={[0.02, 8, 8]} />
+      <meshBasicMaterial color={color} transparent opacity={0.6} depthWrite={false} />
+    </instancedMesh>
+  );
+}
+
+// --- Stable 3D Library Water Asset ---
+function WaterBlob() {
+  const meshRef = useRef<THREE.Mesh>(null);
+  const groupRef = useRef<THREE.Group>(null);
+  
+  useFrame((state) => {
+    if (meshRef.current) {
+      meshRef.current.rotation.x = state.clock.elapsedTime * 0.2;
+      meshRef.current.rotation.y = state.clock.elapsedTime * 0.2;
+    }
+    // Interactive Mouse Parallax (fluid movement tracking mouse)
+    if (groupRef.current) {
+      // Repel from mouse (creates an interactive 'push' effect)
+      const targetX = -(state.pointer.x * state.viewport.width) / 4;
+      const targetY = -(state.pointer.y * state.viewport.height) / 4;
+      
+      groupRef.current.position.x = THREE.MathUtils.lerp(groupRef.current.position.x, targetX, 0.08);
+      groupRef.current.position.y = THREE.MathUtils.lerp(groupRef.current.position.y, targetY, 0.08);
+      
+      // Wobble faster when mouse moves
+      if (meshRef.current) {
+        const speed = Math.abs(state.pointer.x) + Math.abs(state.pointer.y);
+        meshRef.current.rotation.x += speed * 0.05;
+        meshRef.current.rotation.y += speed * 0.05;
+      }
     }
   });
 
   return (
-    <mesh>
-      <planeGeometry args={[viewport.width, viewport.height]} />
-      {/* @ts-expect-error - dynamic tag */}
-      <FluidMaterial ref={materialRef} transparent />
-    </mesh>
+    <>
+      {/* Gold and Green Particles to fill the empty space around the object (independent of group rotation) */}
+      <RepellingParticles count={150} color="#D4AF37" size={2.5} />
+      <RepellingParticles count={80} color="#047857" size={4.0} />
+
+      <group ref={groupRef}>
+        <Float speed={3} rotationIntensity={2} floatIntensity={2}>
+        <mesh ref={meshRef}>
+          <torusKnotGeometry args={[1.5, 0.5, 256, 32]} />
+          <MeshTransmissionMaterial
+            backside
+            backsideThickness={2}
+            thickness={2}
+            chromaticAberration={0.6} 
+            anisotropy={0.5}
+            distortion={0.5} 
+            distortionScale={0.5}
+            temporalDistortion={0.2}
+            ior={1.2} 
+            // Obsidian / Dark Glass. 
+            // With mix-blend-difference, white text over this becomes bright white!
+            color="#111111" 
+            transmission={0.95}
+            roughness={0.05}
+          />
+        </mesh>
+      </Float>
+      
+      <Environment preset="dawn" />
+    </group>
+    </>
   );
 }
 
-export default function Hero({ isLoading }: { isLoading: boolean }) {
-  const nameWords1 = ["Andhika"];
-  const nameWords2 = ["Rafi"];
+export default function Hero() {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Check if the loader has finished
+    const hasLoaded = sessionStorage.getItem("hasLoaded");
+    if (hasLoaded) {
+      setIsLoading(false);
+    } else {
+      const timer = setTimeout(() => {
+        setIsLoading(false);
+      }, 3500);
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   return (
     <section className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-white">
@@ -167,88 +183,82 @@ export default function Hero({ isLoading }: { isLoading: boolean }) {
         <Canvas camera={{ position: [0, 0, 8], fov: 45 }}>
           <ambientLight intensity={1.5} />
           <pointLight position={[10, 10, 10]} intensity={1} color="#ffffff" />
-          <LiquidPool />
+          <WaterBlob />
         </Canvas>
       </div>
 
       {/* Overlay to ensure text readability (subtle radial gradient only) */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_transparent_0%,_#ffffff_100%)] z-0 pointer-events-none opacity-50" />
 
+      {/* Decorative Technical/Editorial Lines */}
+      <div className="absolute left-6 md:left-12 top-0 bottom-0 w-[1px] bg-neutral-900/10 hidden md:block" />
+      <div className="absolute right-6 md:right-12 top-0 bottom-0 w-[1px] bg-neutral-900/10 hidden md:block" />
+      
+      <div className="absolute left-0 top-32 right-0 h-[1px] bg-neutral-900/10 hidden md:block" />
+      <div className="absolute left-0 bottom-32 right-0 h-[1px] bg-neutral-900/10 hidden md:block" />
+      
+      {/* Intersection Markers (Crosshairs) */}
+      <div className="absolute left-12 top-32 w-3 h-3 -translate-x-1/2 -translate-y-1/2 border border-neutral-900/30 rounded-full hidden md:block" />
+      <div className="absolute right-12 top-32 w-3 h-3 -translate-x-1/2 -translate-y-1/2 border border-neutral-900/30 rounded-full hidden md:block" />
+      {/* Left Minimalist Rotated Text (Replaces the old sidebar) */}
+      <motion.div
+        initial={{ opacity: 0, x: -20 }}
+        animate={isLoading ? { opacity: 0, x: -20 } : { opacity: 1, x: 0 }}
+        transition={{ duration: 1, delay: 1 }}
+        className="absolute left-4 md:left-12 top-1/2 -translate-y-1/2 z-50 pointer-events-none mix-blend-difference hidden md:block"
+      >
+        <div className="transform -rotate-90 origin-left whitespace-nowrap text-[10px] md:text-xs tracking-[0.4em] uppercase font-bold text-white">
+          EST. 2026 — DIGITAL PORTFOLIO
+        </div>
+      </motion.div>
+
       {/* Content */}
-      <div className="z-10 flex flex-col items-center text-center px-4 w-full pointer-events-none">
+      <div className="z-10 flex flex-col items-center text-center px-4 w-full pointer-events-none mt-16 mix-blend-difference">
 
         {/* First Line of Name */}
-        <div className="flex flex-wrap justify-center gap-x-3 md:gap-x-6">
-          {nameWords1.map((word, index) => (
-            <div key={index} className="overflow-hidden inline-block py-2">
-              <motion.h1
-                initial={{ y: "150%", rotateZ: 5, opacity: 0 }}
-                animate={isLoading ? { y: "150%", rotateZ: 5, opacity: 0 } : { y: "0%", rotateZ: 0, opacity: 1 }}
-                transition={{
-                  duration: 1,
-                  delay: index * 0.1,
-                  ease: [0.76, 0, 0.24, 1],
-                }}
-                className="text-6xl md:text-8xl lg:text-[10rem] font-sans font-bold tracking-tighter text-neutral-900 uppercase"
-              >
-                {word}
-              </motion.h1>
-            </div>
-          ))}
+        <div className="flex flex-wrap justify-center gap-x-3 md:gap-x-6 overflow-hidden">
+          {!isLoading && <BlurText text="ANDHIKA" delay={0.2} className="text-6xl md:text-8xl lg:text-[10rem] font-sans font-bold tracking-tighter text-white uppercase" />}
         </div>
 
         {/* Second Line of Name */}
-        <div className="flex flex-wrap justify-center gap-x-3 md:gap-x-6 -mt-4 md:-mt-8">
-          {nameWords2.map((word, index) => (
-            <div key={`line2-${index}`} className="overflow-hidden inline-block py-2">
-              <motion.h1
-                initial={{ y: "150%", rotateZ: 5, opacity: 0 }}
-                animate={isLoading ? { y: "150%", rotateZ: 5, opacity: 0 } : { y: "0%", rotateZ: 0, opacity: 1 }}
-                transition={{
-                  duration: 1,
-                  delay: (nameWords1.length + index) * 0.1,
-                  ease: [0.76, 0, 0.24, 1],
-                }}
-                className="text-6xl md:text-8xl lg:text-[10rem] font-sans font-bold tracking-tighter text-neutral-900 uppercase"
-              >
-                {word}
-              </motion.h1>
-            </div>
-          ))}
+        <div className="flex flex-wrap justify-center gap-x-3 md:gap-x-6 -mt-4 md:-mt-8 overflow-hidden">
+          {!isLoading && <BlurText text="RAFI" delay={0.6} className="text-6xl md:text-8xl lg:text-[10rem] font-sans font-bold tracking-tighter text-white uppercase" />}
         </div>
 
         {/* Role Subtitle */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.8, filter: "blur(10px)" }}
-          animate={isLoading ? { opacity: 0, scale: 0.8, filter: "blur(10px)" } : { opacity: 1, scale: 1, filter: "blur(0px)" }}
-          transition={{
-            duration: 1.2,
-            delay: 0.8, // Play after name reveals
-            ease: [0.76, 0, 0.24, 1],
-          }}
-          className="mt-10 px-6 py-2.5 rounded-full border border-neutral-900/10 bg-neutral-900/5 backdrop-blur-md pointer-events-auto"
+          initial={{ opacity: 0, filter: "blur(10px)" }}
+          animate={isLoading ? { opacity: 0, filter: "blur(10px)" } : { opacity: 1, filter: "blur(0px)" }}
+          transition={{ duration: 1.5, delay: 1.2, ease: "easeOut" }}
+          className="mt-8 md:mt-12 overflow-hidden rounded-full border border-white/20 px-6 py-3"
         >
-          <p className="text-xs md:text-sm font-sans font-medium tracking-[0.25em] text-neutral-700 uppercase">
+          <p className="text-xs md:text-sm font-semibold uppercase tracking-[0.2em] text-white">
             Software Engineer & Data Scientist
           </p>
         </motion.div>
       </div>
 
-      {/* Scroll Down Indicator */}
+      {/* Scroll Indicator */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={isLoading ? { opacity: 0, y: 20 } : { opacity: 1, y: 0 }}
-        transition={{ delay: 1.2, duration: 1 }}
-        className="absolute bottom-12 flex flex-col items-center gap-4 z-10 pointer-events-none"
+        initial={{ opacity: 0, filter: "blur(10px)" }}
+        animate={isLoading ? { opacity: 0, filter: "blur(10px)" } : { opacity: 1, filter: "blur(0px)" }}
+        transition={{ duration: 1, delay: 1.5 }}
+        className="absolute bottom-10 z-10 flex flex-col items-center gap-4 pointer-events-none"
       >
-        <span className="text-[10px] font-bold tracking-[0.3em] text-neutral-500 uppercase">
+        <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-neutral-400">
           Scroll to explore
         </span>
-        <div className="relative h-16 w-[1px] bg-neutral-900/20 overflow-hidden">
+        <div className="h-12 w-[1px] bg-neutral-900/20 overflow-hidden">
           <motion.div
-            animate={{ y: ["-100%", "100%"] }}
-            transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
-            className="absolute inset-0 h-full w-full bg-neutral-900"
+            animate={{
+              y: ["-100%", "100%"],
+            }}
+            transition={{
+              duration: 1.5,
+              repeat: Infinity,
+              ease: "linear",
+            }}
+            className="h-full w-full bg-neutral-900"
           />
         </div>
       </motion.div>

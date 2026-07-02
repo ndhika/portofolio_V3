@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Loader from "@/components/Loader";
 import Hero from "@/components/Hero";
+import Navbar from "@/components/Navbar";
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
@@ -18,6 +19,7 @@ export default function Home() {
   return (
     <main className="relative min-h-screen bg-white text-neutral-950 overflow-hidden">
       <Loader onLoadingComplete={() => setIsLoading(false)} />
+      {!isLoading && <Navbar />}
       <Hero isLoading={isLoading} />
     </main>
   );
