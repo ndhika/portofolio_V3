@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { Syne, Instrument_Serif } from "next/font/google";
+import { Space_Grotesk, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 
-const syne = Syne({
+const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
   variable: "--font-sans",
 });
@@ -23,7 +23,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${syne.variable} ${instrumentSerif.variable}`}>
+    <html lang="en" className={`${spaceGrotesk.variable} ${instrumentSerif.variable}`}>
       <body className="font-sans antialiased bg-white text-neutral-950">
         {children}
       </body>

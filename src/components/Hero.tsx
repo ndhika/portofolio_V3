@@ -2,96 +2,156 @@
 
 import { useRef, useMemo } from "react";
 import { motion } from "framer-motion";
-import { Canvas, useFrame } from "@react-three/fiber";
-import { Float, MeshTransmissionMaterial, Environment } from "@react-three/drei";
+import { Canvas, useFrame, extend, useThree } from "@react-three/fiber";
+import { shaderMaterial } from "@react-three/drei";
 import * as THREE from "three";
 
-function BackgroundOrbs() {
-  const orb1Ref = useRef<THREE.Mesh>(null);
-  const orb2Ref = useRef<THREE.Mesh>(null);
-  
-  useFrame((state) => {
-    if (orb1Ref.current && orb2Ref.current) {
-      orb1Ref.current.position.x = Math.sin(state.clock.elapsedTime * 0.3) * 3;
-      orb1Ref.current.position.y = Math.cos(state.clock.elapsedTime * 0.2) * 2;
+const FluidMaskMaterial = shaderMaterial(
+  {
+    uTime: 0,
+    uMouse: new THREE.Vector2(0, 0),
+    uResolution: new THREE.Vector2(1, 1),
+  },
+  // vertex shader
+  `
+    varying vec2 vUv;
+    void main() {
+      vUv = uv;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }
+  `,
+  // fragment shader
+  `
+    varying vec2 vUv;
+    uniform float uTime;
+    uniform vec2 uMouse;
+    uniform vec2 uResolution;
+
+    // Simplex noise function
+    vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+    vec2 mod289(vec2 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+    vec3 permute(vec3 x) { return mod289(((x*34.0)+1.0)*x); }
+    float snoise(vec2 v) {
+      const vec4 C = vec4(0.211324865405187,  0.366025403784439, -0.577350269189626, 0.024390243902439);
+      vec2 i  = floor(v + dot(v, C.yy) );
+      vec2 x0 = v -   i + dot(i, C.xx);
+      vec2 i1;
+      i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
+      vec4 x12 = x0.xyxy + C.xxzz;
+      x12.xy -= i1;
+      i = mod289(i);
+      vec3 p = permute( permute( i.y + vec3(0.0, i1.y, 1.0 )) + i.x + vec3(0.0, i1.x, 1.0 ));
+      vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy), dot(x12.zw,x12.zw)), 0.0);
+      m = m*m ;
+      m = m*m ;
+      vec3 x = 2.0 * fract(p * C.www) - 1.0;
+      vec3 h = abs(x) - 0.5;
+      vec3 ox = floor(x + 0.5);
+      vec3 a0 = x - ox;
+      m *= 1.79284291400159 - 0.85373472095314 * ( a0*a0 + h*h );
+      vec3 g;
+      g.x  = a0.x  * x0.x  + h.x  * x0.y;
+      g.yz = a0.yz * x12.xz + h.yz * x12.yw;
+      return 130.0 * dot(m, g);
+    }
+
+    void main() {
+      // Normalize UV to screen aspect ratio
+      vec2 st = vUv * 2.0 - 1.0;
+      st.x *= uResolution.x / uResolution.y;
       
-      orb2Ref.current.position.x = Math.cos(state.clock.elapsedTime * 0.4) * -3;
-      orb2Ref.current.position.y = Math.sin(state.clock.elapsedTime * 0.3) * -2;
+      vec2 mouse = uMouse;
+      mouse.x *= uResolution.x / uResolution.y;
+
+      // Distance to mouse for interaction
+      vec2 dirToMouse = st - mouse;
+      float distToMouse = length(dirToMouse);
+      
+      // Repel effect: push space away from mouse
+      // The stronger the push, the further the water scatters into droplets
+      float push = smoothstep(1.0, 0.0, distToMouse) * 1.2;
+      vec2 pushVec = normalize(dirToMouse + vec2(0.0001)) * push;
+      
+      // Organic overall flow
+      float flowX = snoise(st * 1.5 + vec2(uTime * 0.2, 0.0)) * 0.1;
+      float flowY = snoise(st * 1.5 + vec2(0.0, uTime * 0.2)) * 0.1;
+      
+      // Warped coordinates: pushed by mouse and distorted by noise
+      vec2 warpedSt = st + pushVec + vec2(flowX, flowY);
+      
+      float distToCenter = length(warpedSt);
+      
+      // Base pool (increased volume for 'more water')
+      float pool = 1.0 / (distToCenter * distToCenter + 0.05);
+      
+      // High-frequency noise for droplets
+      // When the pool stretches (warps), this noise breaks it into scattered droplets
+      float n1 = snoise(warpedSt * 3.5 + uTime * 0.4);
+      float n2 = snoise(warpedSt * 7.0 - uTime * 0.3);
+      float droplets = n1 * 0.7 + n2 * 0.3;
+      
+      // Total field: combine pool and droplets
+      float field = pool + droplets * 1.2;
+      
+      // Add a hard hole exactly at the mouse to guarantee separation
+      field -= 0.5 / (distToMouse * distToMouse + 0.02);
+      
+      // Thresholds for rendering water
+      float waterThreshold = 1.5;
+      
+      // Seawater Blue colors
+      vec3 deepSea = vec3(0.0, 0.3, 0.7);
+      vec3 shallowSea = vec3(0.0, 0.7, 0.9);
+      vec3 waterColor = mix(deepSea, shallowSea, smoothstep(waterThreshold, waterThreshold + 2.0, field));
+      
+      // RGB Chromatic Aberration for glassy rim
+      float edgeR = smoothstep(waterThreshold - 0.2, waterThreshold, field - 0.1) - smoothstep(waterThreshold, waterThreshold + 0.2, field - 0.1);
+      float edgeG = smoothstep(waterThreshold - 0.2, waterThreshold, field)       - smoothstep(waterThreshold, waterThreshold + 0.2, field);
+      float edgeB = smoothstep(waterThreshold - 0.2, waterThreshold, field + 0.1) - smoothstep(waterThreshold, waterThreshold + 0.2, field + 0.1);
+      
+      // Add RGB glass rim
+      waterColor += vec3(edgeR, edgeG, edgeB) * 0.8;
+      
+      // Specular highlight (fake reflection on thick water)
+      float highlight = smoothstep(waterThreshold + 1.0, waterThreshold + 3.0, field);
+      waterColor += vec3(highlight) * 0.8;
+
+      // Alpha mask: hard edge at threshold
+      float alpha = smoothstep(waterThreshold - 0.1, waterThreshold, field);
+      
+      // Make it slightly transparent like water/glass
+      alpha *= 0.85; 
+
+      if (alpha < 0.01) discard; // Don't render empty pixels
+
+      gl_FragColor = vec4(waterColor, alpha);
+    }
+  `
+);
+extend({ FluidMaskMaterial });
+
+// @ts-expect-error - Custom element mapping for React Three Fiber
+const FluidMaterial = 'fluidMaskMaterial';
+
+function LiquidPool() {
+  const materialRef = useRef<any>(null);
+  const { viewport, size } = useThree();
+
+  useFrame((state) => {
+    if (materialRef.current) {
+      materialRef.current.uTime = state.clock.elapsedTime;
+      // Smoothly track mouse
+      materialRef.current.uMouse.lerp(new THREE.Vector2(state.pointer.x, state.pointer.y), 0.1);
+      materialRef.current.uResolution.set(size.width, size.height);
     }
   });
 
   return (
-    <group position={[0, 0, -8]}>
-      {/* Background Plane */}
-      <mesh position={[0, 0, -2]}>
-        <planeGeometry args={[50, 50]} />
-        <meshBasicMaterial color="#ffffff" />
-      </mesh>
-      
-      {/* Colored Refractive Orbs */}
-      <mesh ref={orb1Ref}>
-        <sphereGeometry args={[2, 32, 32]} />
-        <meshBasicMaterial color="#3b82f6" /> {/* Blue */}
-      </mesh>
-      <mesh ref={orb2Ref}>
-        <sphereGeometry args={[2.5, 32, 32]} />
-        <meshBasicMaterial color="#f97316" /> {/* Orange */}
-      </mesh>
-    </group>
-  );
-}
-
-function LiquidGlassBlob() {
-  const meshRef = useRef<THREE.Mesh>(null);
-  const groupRef = useRef<THREE.Group>(null);
-  
-  useFrame((state) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.x = state.clock.elapsedTime * 0.2;
-      meshRef.current.rotation.y = state.clock.elapsedTime * 0.2;
-    }
-    
-    // Interactive Mouse Parallax
-    if (groupRef.current) {
-      const targetRotationX = (state.pointer.y * Math.PI) / 8;
-      const targetRotationY = (state.pointer.x * Math.PI) / 8;
-      
-      groupRef.current.rotation.x = THREE.MathUtils.lerp(groupRef.current.rotation.x, targetRotationX, 0.05);
-      groupRef.current.rotation.y = THREE.MathUtils.lerp(groupRef.current.rotation.y, targetRotationY, 0.05);
-      
-      const targetPosX = state.pointer.x * 0.5;
-      const targetPosY = state.pointer.y * 0.5;
-      groupRef.current.position.x = THREE.MathUtils.lerp(groupRef.current.position.x, targetPosX, 0.05);
-      groupRef.current.position.y = THREE.MathUtils.lerp(groupRef.current.position.y, targetPosY, 0.05);
-    }
-  });
-
-  return (
-    <group ref={groupRef}>
-      <BackgroundOrbs />
-      
-      <Float speed={2} rotationIntensity={1} floatIntensity={1.5}>
-        <mesh ref={meshRef} position={[0, 0, 0]}>
-          <icosahedronGeometry args={[2.2, 64]} />
-          <MeshTransmissionMaterial
-            backside
-            backsideThickness={2}
-            thickness={2.5}
-            chromaticAberration={0.06}
-            anisotropy={0.5}
-            distortion={0.8}
-            distortionScale={0.5}
-            temporalDistortion={0.15}
-            ior={1.4}
-            color="#ffffff"
-            transmission={1}
-            roughness={0.05}
-          />
-        </mesh>
-      </Float>
-      
-      <Environment preset="city" />
-    </group>
+    <mesh>
+      <planeGeometry args={[viewport.width, viewport.height]} />
+      {/* @ts-expect-error - dynamic tag */}
+      <FluidMaterial ref={materialRef} transparent />
+    </mesh>
   );
 }
 
@@ -101,23 +161,22 @@ export default function Hero({ isLoading }: { isLoading: boolean }) {
 
   return (
     <section className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-white">
-      
+
       {/* 3D Canvas Background */}
       <div className="absolute inset-0 z-0">
         <Canvas camera={{ position: [0, 0, 8], fov: 45 }}>
           <ambientLight intensity={1.5} />
           <pointLight position={[10, 10, 10]} intensity={1} color="#ffffff" />
-          <LiquidGlassBlob />
+          <LiquidPool />
         </Canvas>
       </div>
 
-      {/* Overlay to ensure text readability */}
-      <div className="absolute inset-0 bg-white/30 z-0 mix-blend-screen pointer-events-none" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_transparent_0%,_#ffffff_100%)] z-0 pointer-events-none opacity-80" />
+      {/* Overlay to ensure text readability (subtle radial gradient only) */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_transparent_0%,_#ffffff_100%)] z-0 pointer-events-none opacity-50" />
 
       {/* Content */}
       <div className="z-10 flex flex-col items-center text-center px-4 w-full pointer-events-none">
-        
+
         {/* First Line of Name */}
         <div className="flex flex-wrap justify-center gap-x-3 md:gap-x-6">
           {nameWords1.map((word, index) => (
