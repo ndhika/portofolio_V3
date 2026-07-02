@@ -1,42 +1,368 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Inter", system-ui, sans-serif;
-  --font-display: "Space Grotesk", sans-serif;
-  --font-mono: "JetBrains Mono", monospace;
+  --font-sans: var(--font-dm-sans), system-ui, sans-serif;
+  --font-display: var(--font-playfair), Georgia, serif;
+  --font-mono: var(--font-dm-mono), monospace;
 }
 
-/* ===== BASE ===== */
+/* =============================================
+   DESIGN TOKENS — CSS Variables
+   (theme-switchable via JS for dark-world portal)
+   ============================================= */
+:root {
+  /* Light world (default) */
+  --bg: #F7F5F2;
+  --bg-alt: #EEEBE6;
+  --bg-surface: #FAFAF8;
+  --text: #1A1814;
+  --text-muted: #8A8680;
+  --text-dim: #C4C0BA;
+  --accent: #B5956A;        /* warm gold accent */
+  --accent-rgb: 181, 149, 106;
+  --border: rgba(26, 24, 20, 0.08);
+  --border-strong: rgba(26, 24, 20, 0.15);
+
+  /* Typographic scale */
+  --tracking-tight: -0.04em;
+  --tracking-display: -0.03em;
+}
+
+/* Dark-world overrides applied via data-world="dark" on a section wrapper */
+[data-world="dark"] {
+  --bg: #0C0B09;
+  --bg-alt: #161411;
+  --bg-surface: #1E1C18;
+  --text: #F0EDE8;
+  --text-muted: #6E6B65;
+  --text-dim: #3A3830;
+  --border: rgba(240, 237, 232, 0.07);
+  --border-strong: rgba(240, 237, 232, 0.12);
+}
+
+/* =============================================
+   BASE
+   ============================================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 html {
-  scroll-behavior: smooth;
-  background-color: #FAFAF9;
+  background-color: var(--bg);
+  scroll-behavior: auto; /* Lenis owns scroll */
+  font-size: 16px;
 }
 
 body {
-  background: #FAFAF9;
-  color: #111111;
+  background: var(--bg);
+  color: var(--text);
   overflow-x: hidden;
   cursor: none;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0s; /* JS handles transitions */
 }
 
 ::selection {
-  background: #2A4CFF;
-  color: #FAFAF9;
+  background: var(--accent);
+  color: var(--bg-surface);
 }
 
-/* ===== SCROLLBAR ===== */
 ::-webkit-scrollbar {
-  width: 0px;
+  width: 0;
 }
 
-/* ===== UTILITIES ===== */
-.writing-vertical-rl {
+/* =============================================
+   TYPOGRAPHY UTILITIES
+   ============================================= */
+.text-display {
+  font-family: var(--font-display);
+  letter-spacing: var(--tracking-display);
+  font-style: italic;
+  line-height: 0.9;
+}
+
+.text-display-upright {
+  font-family: var(--font-display);
+  letter-spacing: var(--tracking-tight);
+  line-height: 0.9;
+}
+
+.text-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+/* =============================================
+   SCROLL PROGRESS INDICATOR — Thin vertical line
+   ============================================= */
+.scroll-track {
+  position: fixed;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 80px;
+  width: 1px;
+  background: var(--border-strong);
+  z-index: 9000;
+  pointer-events: none;
+}
+
+.scroll-track-dot {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.4);
+}
+
+/* =============================================
+   NOISE GRAIN OVERLAY
+   ============================================= */
+.noise-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  pointer-events: none;
+  opacity: 0.04;
+  mix-blend-mode: multiply;
+}
+
+[data-world="dark"] .noise-overlay {
+  mix-blend-mode: overlay;
+  opacity: 0.03;
+}
+
+/* =============================================
+   CUSTOM CURSOR
+   ============================================= */
+.cursor-dot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  pointer-events: none;
+  border-radius: 50%;
+  mix-blend-mode: difference;
+}
+
+/* =============================================
+   MAGNETIC BUTTON
+   ============================================= */
+.mag-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 16px 44px;
+  border: 1px solid var(--border-strong);
+  border-radius: 100px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text);
+  background: transparent;
+  overflow: hidden;
+  cursor: none;
+  transition: border-color 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+              color 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mag-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--text);
+  border-radius: inherit;
+  transform: translateY(101%);
+  transition: transform 0.6s cubic-bezier(0.76, 0, 0.24, 1);
+  z-index: 0;
+}
+
+.mag-btn:hover {
+  color: var(--bg);
+  border-color: var(--text);
+}
+
+.mag-btn:hover::before {
+  transform: translateY(0);
+}
+
+.mag-btn > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* =============================================
+   SECTION NUMBER WATERMARK
+   ============================================= */
+.section-num {
+  position: absolute;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(100px, 18vw, 260px);
+  line-height: 0.85;
+  color: var(--text);
+  opacity: 0.025;
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+  letter-spacing: -0.06em;
+}
+
+/* =============================================
+   IMAGE / CARD HOVER REVEAL
+   ============================================= */
+.img-reveal-wrap {
+  overflow: hidden;
+  position: relative;
+}
+
+.img-reveal-inner {
+  clip-path: inset(100% 0 0 0);
+  transition: clip-path 1.2s cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+.img-reveal-inner.revealed {
+  clip-path: inset(0% 0 0 0);
+}
+
+/* Project card hover */
+.project-card-img {
+  transition: transform 1.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.project-card:hover .project-card-img {
+  transform: scale(1.06);
+}
+
+.project-card-info {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.project-card:hover .project-card-info {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* =============================================
+   DARK WORLD PORTAL — the key transition section
+   ============================================= */
+.portal-section {
+  position: relative;
+  background: var(--bg);
+}
+
+/* The gradient mesh that transitions to dark */
+.portal-bg {
+  position: absolute;
+  inset: 0;
+  background: var(--bg);
+  z-index: 0;
+}
+
+/* =============================================
+   SHIMMER SKELETON
+   ============================================= */
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--bg-alt) 25%,
+    var(--bg-surface) 50%,
+    var(--bg-alt) 75%
+  );
+  background-size: 400% 100%;
+  animation: shimmer 1.8s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+/* =============================================
+   LENIS
+   ============================================= */
+html.lenis, html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+/* =============================================
+   PREFERS REDUCED MOTION
+   ============================================= */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  body {
+    cursor: auto;
+  }
+
+  .img-reveal-inner {
+    clip-path: none !important;
+  }
+}
+
+/* =============================================
+   UTILITIES
+   ============================================= */
+.writing-vertical {
   writing-mode: vertical-rl;
+  text-orientation: mixed;
 }
 
-/* ===== MASKS ===== */
-.clip-path-reveal {
-  clip-path: polygon(0 100%, 100% 100%, 100% 100%, 0 100%);
+/* Thin horizontal rule */
+.rule {
+  width: 100%;
+  height: 1px;
+  background: var(--border);
+}
+
+/* Line that grows on hover */
+.underline-grow {
+  position: relative;
+}
+
+.underline-grow::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: var(--accent);
+  transition: width 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.underline-grow:hover::after {
+  width: 100%;
 }

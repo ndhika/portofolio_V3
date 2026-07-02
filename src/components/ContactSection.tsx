@@ -4,40 +4,36 @@ import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { socialLinks } from "@/lib/data";
+import MagneticButton from "./MagneticButton";
 
 gsap.registerPlugin(ScrollTrigger);
 
 export default function ContactSection() {
   const sectionRef = useRef<HTMLElement>(null);
-  const bgRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Animate background color in for a dramatic finish
-      gsap.fromTo(
-        bgRef.current,
-        { clipPath: "circle(0% at 50% 100%)" },
-        {
-          clipPath: "circle(150% at 50% 100%)",
-          ease: "power2.inOut",
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top 60%",
-            end: "bottom bottom",
-            scrub: 1,
-          },
-        }
-      );
-
       gsap.from(".contact-reveal", {
-        y: 100,
+        y: 40,
         opacity: 0,
         stagger: 0.1,
-        duration: 1,
-        ease: "power4.out",
+        duration: 1.1,
+        ease: "power3.out",
         scrollTrigger: {
           trigger: sectionRef.current,
-          start: "top 40%",
+          start: "top 70%",
+        },
+      });
+
+      // Rule draw-in
+      gsap.from(".contact-rule", {
+        scaleX: 0,
+        transformOrigin: "left",
+        duration: 1.5,
+        ease: "expo.inOut",
+        scrollTrigger: {
+          trigger: ".contact-rule",
+          start: "top 85%",
         },
       });
     }, sectionRef);
@@ -49,63 +45,86 @@ export default function ContactSection() {
     <section
       ref={sectionRef}
       id="contact"
-      className="relative text-white py-32 md:py-48 px-6 md:px-12 min-h-screen flex flex-col justify-between overflow-hidden"
+      className="relative py-32 md:py-48 px-6 md:px-12 lg:px-20"
+      style={{ background: "var(--bg-alt)" }}
     >
-      {/* Expanding Cobalt Blue Background */}
-      <div ref={bgRef} className="absolute inset-0 bg-[#2A4CFF] -z-10" />
+      {/* Section watermark */}
+      <span
+        className="section-num"
+        style={{ bottom: "-0.05em", right: "-0.02em" }}
+      >
+        04
+      </span>
 
-      {/* Grid Pattern overlay */}
-      <div 
-        className="absolute inset-0 z-0 opacity-[0.05] pointer-events-none" 
-        style={{
-          backgroundImage: `linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)`,
-          backgroundSize: '50px 50px'
-        }}
-      />
-
-      <div className="max-w-[1600px] mx-auto w-full flex-1 flex flex-col justify-center z-10 relative">
+      <div className="max-w-[1300px] mx-auto relative z-10">
+        {/* Label */}
         <div className="contact-reveal flex items-center gap-4 mb-10">
-          <div className="w-12 h-[2px] bg-[#DFF25C]" />
-          <span className="font-mono text-xs text-[#DFF25C] tracking-widest uppercase font-bold">
-            Let's Talk
+          <div className="h-px w-8" style={{ background: "var(--accent)" }} />
+          <span className="text-label" style={{ color: "var(--text-dim)" }}>
+            Let&apos;s Connect
           </span>
         </div>
 
+        {/* Large CTA headline */}
         <div className="contact-reveal">
           <a
             href="mailto:azumarafi@gmail.com"
-            className="group inline-block"
+            className="group block"
             data-cursor-hover
-            data-cursor-label="Email Me"
+            data-cursor-label="Email"
           >
-            <h2 className="font-display text-5xl md:text-8xl lg:text-[10rem] font-bold tracking-tighter leading-[0.85] text-white">
+            <h2
+              className="font-display font-medium transition-colors duration-700"
+              style={{
+                fontSize: "clamp(2.5rem, 8vw, 8rem)",
+                letterSpacing: "-0.04em",
+                lineHeight: "0.92",
+                color: "var(--text)",
+                fontStyle: "italic",
+              }}
+            >
               azumarafi
               <br />
-              <span className="text-[#DFF25C] italic group-hover:pl-12 transition-all duration-500 ease-out">@gmail.com</span>
+              <span style={{ fontStyle: "normal", color: "var(--text-muted)" }}>
+                @gmail.com
+              </span>
             </h2>
           </a>
         </div>
-      </div>
 
-      <div className="contact-reveal max-w-[1600px] mx-auto w-full flex flex-col md:flex-row items-center justify-between pt-12 border-t border-white/20 gap-8 z-10 relative mt-24">
-        <div className="flex gap-8">
-          {socialLinks.map((link) => (
-            <a
-              key={link.name}
-              href={link.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-mono text-xs font-bold tracking-widest uppercase hover:text-[#DFF25C] transition-colors flex items-center gap-2 group"
-              data-cursor-hover
-            >
-              {link.name}
-              <span className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform">↗</span>
-            </a>
-          ))}
+        {/* CTA Button */}
+        <div className="contact-reveal mt-12">
+          <MagneticButton href="mailto:azumarafi@gmail.com">
+            Start a conversation
+          </MagneticButton>
         </div>
 
-        <div className="font-mono text-[10px] tracking-widest text-white/50 uppercase">
-          © {new Date().getFullYear()} ANDHIKA RAFI — ALL RIGHTS RESERVED
+        {/* Rule */}
+        <div
+          className="contact-rule mt-20 md:mt-28 h-px"
+          style={{ background: "var(--border)" }}
+        />
+
+        {/* Footer */}
+        <div className="contact-reveal flex flex-col md:flex-row items-start md:items-center justify-between gap-8 mt-8">
+          <div className="flex gap-8">
+            {socialLinks.map((link) => (
+              <a
+                key={link.name}
+                href={link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-label underline-grow"
+                style={{ color: "var(--text-muted)" }}
+                data-cursor-hover
+              >
+                {link.name}
+              </a>
+            ))}
+          </div>
+          <span className="text-label" style={{ color: "var(--text-dim)" }}>
+            © {new Date().getFullYear()} Andhika Rafi
+          </span>
         </div>
       </div>
     </section>

@@ -1,120 +1,137 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import { motion, useMotionValue, useSpring } from "framer-motion";
+import { useEffect, useState, useRef, useCallback } from "react";
+import { motion, useMotionValue, useSpring, AnimatePresence } from "framer-motion";
 
 export default function CustomCursor() {
-  const [isHovering, setIsHovering] = useState(false);
-  const [isVisible, setIsVisible] = useState(false);
-  const [hoverLabel, setHoverLabel] = useState("");
-  const [isMounted, setIsMounted] = useState(false);
+  const [state, setState] = useState<"default" | "hover" | "label">("default");
+  const [label, setLabel] = useState("");
+  const [visible, setVisible] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
-  const cursorX = useMotionValue(-100);
-  const cursorY = useMotionValue(-100);
+  const mx = useMotionValue(-100);
+  const my = useMotionValue(-100);
 
-  const springConfig = { damping: 25, stiffness: 300, mass: 0.5 };
-  const smoothX = useSpring(cursorX, springConfig);
-  const smoothY = useSpring(cursorY, springConfig);
+  // Tight spring for the main dot
+  const sx = useSpring(mx, { damping: 22, stiffness: 500, mass: 0.2 });
+  const sy = useSpring(my, { damping: 22, stiffness: 500, mass: 0.2 });
 
-  const handleMouseMove = useCallback(
+  // Slower spring for the ring
+  const rx = useSpring(mx, { damping: 35, stiffness: 220, mass: 0.6 });
+  const ry = useSpring(my, { damping: 35, stiffness: 220, mass: 0.6 });
+
+  const onMove = useCallback(
     (e: MouseEvent) => {
-      cursorX.set(e.clientX);
-      cursorY.set(e.clientY);
-      if (!isVisible) setIsVisible(true);
+      mx.set(e.clientX);
+      my.set(e.clientY);
+      if (!visible) setVisible(true);
     },
-    [cursorX, cursorY, isVisible]
+    [mx, my, visible]
   );
 
   useEffect(() => {
-    setIsMounted(true);
+    setMounted(true);
+    if (window.matchMedia("(pointer: coarse)").matches) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-    // Only show custom cursor on non-touch devices
-    const isTouch = window.matchMedia("(pointer: coarse)").matches;
-    if (isTouch) return;
+    window.addEventListener("mousemove", onMove);
 
-    const prefersReducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)"
-    ).matches;
-    if (prefersReducedMotion) return;
-
-    window.addEventListener("mousemove", handleMouseMove);
-    document.body.classList.add("cursor-none");
-
-    const handleMouseOver = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      const interactive = target.closest(
+    const onOver = (e: MouseEvent) => {
+      const el = (e.target as HTMLElement).closest(
         "a, button, [data-cursor-hover], input, textarea"
       );
-      if (interactive) {
-        setIsHovering(true);
-        const label =
-          interactive.getAttribute("data-cursor-label") || "";
-        setHoverLabel(label);
+      if (el) {
+        const l = el.getAttribute("data-cursor-label") || "";
+        setState(l ? "label" : "hover");
+        setLabel(l);
       }
     };
 
-    const handleMouseOut = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      const interactive = target.closest(
+    const onOut = (e: MouseEvent) => {
+      const el = (e.target as HTMLElement).closest(
         "a, button, [data-cursor-hover], input, textarea"
       );
-      if (interactive) {
-        setIsHovering(false);
-        setHoverLabel("");
+      if (el) {
+        setState("default");
+        setLabel("");
       }
     };
 
-    const handleMouseLeave = () => {
-      setIsVisible(false);
-    };
-
-    document.addEventListener("mouseover", handleMouseOver);
-    document.addEventListener("mouseout", handleMouseOut);
-    document.addEventListener("mouseleave", handleMouseLeave);
+    document.addEventListener("mouseover", onOver);
+    document.addEventListener("mouseout", onOut);
+    document.addEventListener("mouseleave", () => setVisible(false));
+    document.addEventListener("mouseenter", () => setVisible(true));
 
     return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseover", handleMouseOver);
-      document.removeEventListener("mouseout", handleMouseOut);
-      document.removeEventListener("mouseleave", handleMouseLeave);
-      document.body.classList.remove("cursor-none");
+      window.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseover", onOver);
+      document.removeEventListener("mouseout", onOut);
     };
-  }, [handleMouseMove]);
+  }, [onMove]);
 
-  if (!isMounted) return null;
+  if (!mounted) return null;
+
+  // Dot size
+  const dotSize = state === "label" ? 72 : state === "hover" ? 40 : 8;
 
   return (
-    <motion.div
-      className="custom-cursor fixed top-0 left-0 pointer-events-none z-[9999]"
-      style={{
-        x: smoothX,
-        y: smoothY,
-      }}
-    >
+    <>
+      {/* Outer ring — lags behind */}
       <motion.div
-        className="relative flex items-center justify-center rounded-full"
+        className="fixed top-0 left-0 pointer-events-none z-[9998] rounded-full border"
         style={{
-          transform: "translate(-50%, -50%)",
-          opacity: isVisible ? 1 : 0,
+          x: rx,
+          y: ry,
+          translateX: "-50%",
+          translateY: "-50%",
+          borderColor: "var(--accent)",
         }}
         animate={{
-          width: isHovering ? 64 : 10,
-          height: isHovering ? 64 : 10,
-          backgroundColor: isHovering ? "#2A4CFF" : "#111111",
+          width: state === "default" ? 32 : 0,
+          height: state === "default" ? 32 : 0,
+          opacity: visible && state === "default" ? 0.3 : 0,
         }}
-        transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+      />
+
+      {/* Main dot — fast */}
+      <motion.div
+        className="fixed top-0 left-0 pointer-events-none z-[9999] rounded-full flex items-center justify-center"
+        style={{
+          x: sx,
+          y: sy,
+          translateX: "-50%",
+          translateY: "-50%",
+          backgroundColor:
+            state === "label"
+              ? "var(--text)"
+              : state === "hover"
+              ? "var(--accent)"
+              : "var(--text)",
+        }}
+        animate={{
+          width: dotSize,
+          height: dotSize,
+          opacity: visible ? 1 : 0,
+        }}
+        transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
       >
-        {hoverLabel && isHovering && (
-          <motion.span
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.5 }}
-            className="text-white text-[10px] font-mono font-medium tracking-wider uppercase"
-          >
-            {hoverLabel}
-          </motion.span>
-        )}
+        <AnimatePresence mode="wait">
+          {label && state === "label" && (
+            <motion.span
+              key={label}
+              className="text-label text-center leading-tight"
+              style={{ color: "var(--bg)", fontSize: "9px" }}
+              initial={{ opacity: 0, scale: 0.6 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.6 }}
+              transition={{ duration: 0.2 }}
+            >
+              {label}
+            </motion.span>
+          )}
+        </AnimatePresence>
       </motion.div>
-    </motion.div>
+    </>
   );
 }

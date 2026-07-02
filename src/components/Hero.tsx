@@ -3,109 +3,174 @@
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import dynamic from "next/dynamic";
+import MagneticButton from "./MagneticButton";
 
-const Scene = dynamic(() => import("./Scene"), { ssr: false });
 gsap.registerPlugin(ScrollTrigger);
 
 export default function Hero() {
-  const containerRef = useRef<HTMLElement>(null);
-  const textRef = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
+  const headlineRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Kinetic text entry animation
-      gsap.from(".hero-char", {
-        y: 150,
-        opacity: 0,
-        rotateX: -90,
-        stagger: 0.05,
-        duration: 1.5,
-        ease: "power4.out",
-        delay: 0.5,
+      // Elegant staggered line reveal
+      const lines = gsap.utils.toArray<HTMLElement>(".hero-line");
+      gsap.set(lines, { y: "105%", opacity: 0 });
+      gsap.to(lines, {
+        y: "0%",
+        opacity: 1,
+        stagger: 0.14,
+        duration: 1.3,
+        ease: "power3.out",
+        delay: 2.7,
       });
 
-      // Scroll distortion/parallax
-      gsap.to(textRef.current, {
-        y: 250,
-        scale: 0.9,
+      // Fade up for sub elements
+      gsap.from(".hero-sub", {
+        y: 20,
         opacity: 0,
-        filter: "blur(10px)",
+        stagger: 0.1,
+        duration: 1,
+        ease: "power3.out",
+        delay: 3.3,
+      });
+
+      // Scroll-linked parallax: headline drifts up gracefully
+      gsap.to(headlineRef.current, {
+        y: -120,
         ease: "none",
         scrollTrigger: {
-          trigger: containerRef.current,
+          trigger: sectionRef.current,
           start: "top top",
           end: "bottom top",
-          scrub: 1,
+          scrub: 1.5,
         },
       });
-    }, containerRef);
+
+      // Scroll indicator fade
+      gsap.from(".scroll-hint", {
+        opacity: 0,
+        y: 8,
+        delay: 4,
+        duration: 0.8,
+        ease: "power2.out",
+      });
+    }, sectionRef);
 
     return () => ctx.revert();
   }, []);
 
-  const firstName = "ANDHIKA";
-  const lastName = "RAFI";
-
   return (
     <section
-      ref={containerRef}
+      ref={sectionRef}
       id="hero"
-      className="relative h-screen w-full flex flex-col items-center justify-center overflow-hidden bg-[#FAFAF9]"
+      className="relative min-h-[100svh] flex flex-col justify-end overflow-hidden"
+      style={{ background: "var(--bg)" }}
     >
-      {/* 3D Asset Background */}
-      <Scene />
-
-      {/* Grid Overlay */}
-      <div 
-        className="absolute inset-0 z-0 opacity-[0.03] pointer-events-none" 
+      {/* Subtle warm gradient at top */}
+      <div
+        className="absolute top-0 left-0 right-0 h-[50vh] pointer-events-none"
         style={{
-          backgroundImage: `linear-gradient(#111 1px, transparent 1px), linear-gradient(90deg, #111 1px, transparent 1px)`,
-          backgroundSize: '50px 50px'
+          background:
+            "radial-gradient(ellipse 80% 60% at 30% 0%, rgba(181,149,106,0.06) 0%, transparent 70%)",
         }}
       />
 
-      <div ref={textRef} className="relative z-10 text-center pointer-events-none flex flex-col items-center">
-        {/* Kinetic Title */}
-        <div className="perspective-1000">
-          <h1 className="font-display text-[15vw] leading-[0.8] tracking-[-0.04em] font-bold text-[#111] m-0 flex overflow-hidden">
-            {firstName.split("").map((char, i) => (
-              <span key={`f-${i}`} className="hero-char inline-block origin-bottom">
-                {char}
-              </span>
-            ))}
+      {/* Section number */}
+      <span
+        className="section-num"
+        style={{ bottom: "-0.1em", right: "-0.02em" }}
+      >
+        01
+      </span>
+
+      <div
+        ref={headlineRef}
+        className="relative z-10 px-6 md:px-12 lg:px-20 pb-16 md:pb-24"
+      >
+        {/* Label row */}
+        <div className="hero-sub flex items-center justify-between mb-10 md:mb-14">
+          <span className="text-label" style={{ color: "var(--text-muted)" }}>
+            Andhika Hisyam M. Rafi
+          </span>
+          <span className="text-label hidden md:block" style={{ color: "var(--text-dim)" }}>
+            Yogyakarta, Indonesia
+          </span>
+        </div>
+
+        {/* Main headline — editorial serif */}
+        <div className="overflow-hidden">
+          <h1
+            className="hero-line text-display font-display font-medium"
+            style={{
+              fontSize: "clamp(4rem, 13vw, 11rem)",
+              color: "var(--text)",
+            }}
+          >
+            Software
           </h1>
         </div>
-        <div className="perspective-1000 mt-[-2vw]">
-          <h1 className="font-display text-[15vw] leading-[0.8] tracking-[-0.04em] font-bold text-[#2A4CFF] m-0 flex overflow-hidden">
-            {lastName.split("").map((char, i) => (
-              <span key={`l-${i}`} className="hero-char inline-block origin-bottom" style={{ animationDelay: `${(firstName.length + i) * 0.05}s` }}>
-                {char}
-              </span>
-            ))}
+        <div className="overflow-hidden">
+          <h1
+            className="hero-line text-display font-display font-medium"
+            style={{
+              fontSize: "clamp(4rem, 13vw, 11rem)",
+              color: "var(--text-muted)",
+              marginLeft: "clamp(1rem, 4vw, 6rem)", /* offset */
+            }}
+          >
+            Developer
+          </h1>
+        </div>
+        <div className="overflow-hidden">
+          <h1
+            className="hero-line font-display font-medium"
+            style={{
+              fontSize: "clamp(4rem, 13vw, 11rem)",
+              letterSpacing: "-0.04em",
+              lineHeight: "0.9",
+              color: "var(--text)",
+            }}
+          >
+            & Data Science
           </h1>
         </div>
 
-        {/* Subtitle & CTA */}
-        <div className="mt-12 flex flex-col items-center gap-6 hero-char opacity-0">
-          <p className="font-sans text-lg md:text-xl font-medium tracking-wide text-[#666]">
-            Software Developer & Data Science Enthusiast
-          </p>
-          
-          <a 
-            href="#about"
-            className="group flex flex-col items-center gap-2 pointer-events-auto"
-            data-cursor-hover
-            data-cursor-label="Explore"
+        {/* CTA row */}
+        <div
+          className="hero-sub flex items-center justify-between mt-12 md:mt-16 pt-6"
+          style={{ borderTop: "1px solid var(--border)" }}
+        >
+          <p
+            className="font-sans max-w-xs md:max-w-sm"
+            style={{
+              fontSize: "0.9rem",
+              color: "var(--text-muted)",
+              lineHeight: "1.7",
+            }}
           >
-            <span className="font-mono text-[10px] tracking-widest uppercase text-[#111]">
-              Scroll Down
-            </span>
-            <div className="w-[1px] h-12 bg-[#111]/20 relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-full h-1/2 bg-[#111] animate-bounce" />
-            </div>
-          </a>
+            Building scalable web applications with
+            clean architecture and thoughtful craft.
+          </p>
+          <MagneticButton href="/work">
+            View Work ↗
+          </MagneticButton>
         </div>
+      </div>
+
+      {/* Scroll hint */}
+      <div
+        className="scroll-hint absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-20"
+        style={{ color: "var(--text-dim)" }}
+      >
+        <span className="text-label">Scroll</span>
+        <div
+          className="w-px h-10"
+          style={{
+            background:
+              "linear-gradient(to bottom, var(--text-muted), transparent)",
+          }}
+        />
       </div>
     </section>
   );
