@@ -3,8 +3,21 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
+const leftLines = [
+  "// TRANSMITTING QUANTUM SIGNALS...",
+  "// UNLOCKING DIGITAL DIMENSIONS...",
+  "// YOU'RE ABOUT TO ENTER THE FUTURE...",
+  "// INITIALIZING NEURAL INTERFACE...",
+  "// DECRYPTING DATA STREAMS...",
+  "// SYNCHRONIZING PARALLEL REALITIES..."
+];
+
+const rightText = "// HANG TIGHT, EXPLORER. THE DATA TRANSFER IS IN PROGRESS. IT MIGHT TAKE A MOMENT, BUT THE JOURNEY AHEAD IS WORTH THE WAIT..";
+
 export default function Loader({ onLoadingComplete }: { onLoadingComplete: () => void }) {
   const [isVisible, setIsVisible] = useState(true);
+  const [typedRight, setTypedRight] = useState("");
+  const [visibleLines, setVisibleLines] = useState(0);
 
   useEffect(() => {
     const hasLoaded = sessionStorage.getItem("hasLoaded");
@@ -14,13 +27,41 @@ export default function Loader({ onLoadingComplete }: { onLoadingComplete: () =>
       return;
     }
 
-    const timer = setTimeout(() => {
+    // Sequence timing
+    let timeout: NodeJS.Timeout;
+
+    // Type out the left lines one by one
+    const lineInterval = setInterval(() => {
+      setVisibleLines((prev) => {
+        if (prev < leftLines.length) return prev + 1;
+        clearInterval(lineInterval);
+        return prev;
+      });
+    }, 400); // 400ms per line
+
+    // Type out right text char by char
+    let charIndex = 0;
+    const typeInterval = setInterval(() => {
+      if (charIndex < rightText.length) {
+        setTypedRight(rightText.substring(0, charIndex + 1));
+        charIndex++;
+      } else {
+        clearInterval(typeInterval);
+      }
+    }, 20); // 20ms per char
+
+    // End loader after everything is done and pop homepage
+    timeout = setTimeout(() => {
       setIsVisible(false);
       sessionStorage.setItem("hasLoaded", "true");
-      setTimeout(onLoadingComplete, 800); // Wait for exit zoom animation
-    }, 3400); // Sequence duration
+      setTimeout(onLoadingComplete, 800); // Exit fade/scale animation time
+    }, 4500);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearInterval(lineInterval);
+      clearInterval(typeInterval);
+      clearTimeout(timeout);
+    };
   }, [onLoadingComplete]);
 
   if (!isVisible && !sessionStorage.getItem("hasLoaded")) return null;
@@ -29,82 +70,57 @@ export default function Loader({ onLoadingComplete }: { onLoadingComplete: () =>
     <AnimatePresence>
       {isVisible && (
         <motion.div
-          exit={{ opacity: 0, transition: { duration: 0.8 } }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-white overflow-hidden"
+          exit={{ opacity: 0, scale: 1.05, filter: "blur(10px)", transition: { duration: 0.8, ease: "easeInOut" } }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-[#0a0a0a] text-white font-mono text-[10px] md:text-[11px] lg:text-xs overflow-hidden"
         >
-          {/* Zoom container */}
-          <motion.div
-             initial={{ scale: 1 }}
-             exit={{ scale: 40, opacity: 0, filter: "blur(10px)" }}
-             transition={{ duration: 0.8, ease: "easeIn" }}
-             className="relative flex flex-col items-center justify-center"
-          >
-            <svg viewBox="0 0 200 200" className="w-40 h-40 md:w-56 md:h-56 overflow-visible">
-              {/* Cat Head Outline */}
-              <motion.path
-                d="M 50,120 C 50,160 150,160 150,120 C 150,90 170,40 170,40 L 125,70 Q 100,55 75,70 L 30,40 C 30,40 50,90 50,120 Z"
-                stroke="#171717"
-                strokeWidth="4"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                fill="transparent"
-                initial={{ pathLength: 0 }}
-                animate={{ pathLength: 1 }}
-                transition={{ duration: 1.2, ease: "easeInOut" }}
-              />
-              
-              {/* Left Eye */}
-              <motion.path
-                d="M 65,100 Q 75,90 85,100 Q 75,110 65,100 Z"
-                fill="#171717"
-                initial={{ scale: 0 }}
-                animate={{ 
-                  scaleX: [0, 1.2, 1, 1, 1, 1],
-                  scaleY: [0, 1.2, 1, 1, 0.1, 1],
-                }}
-                transition={{ 
-                  duration: 2, 
-                  times: [0, 0.15, 0.25, 0.8, 0.9, 1],
-                  delay: 1.0 
-                }}
-              />
+          <div className="w-full max-w-7xl px-8 grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-4 items-center">
+            
+            {/* Left Column - Terminal Lines */}
+            <div className="flex flex-col space-y-1.5 md:space-y-2">
+              {leftLines.map((line, index) => {
+                const lineVisible = index < visibleLines;
+                const isHighlighted = index === 2 && visibleLines > 2; // Highlight the 3rd line
 
-              {/* Right Eye */}
-              <motion.path
-                d="M 115,100 Q 125,90 135,100 Q 125,110 115,100 Z"
-                fill="#171717"
-                initial={{ scale: 0 }}
-                animate={{ 
-                  scaleX: [0, 1.2, 1, 1, 1, 1],
-                  scaleY: [0, 1.2, 1, 1, 0.1, 1],
-                }}
-                transition={{ 
-                  duration: 2, 
-                  times: [0, 0.15, 0.25, 0.8, 0.9, 1],
-                  delay: 1.0 
-                }}
-              />
-              
-              {/* Cat Nose */}
-              <motion.path
-                d="M 95,115 L 105,115 L 100,122 Z"
-                fill="#171717"
-                initial={{ scale: 0 }}
-                animate={{ scale: [0, 1.2, 1] }}
-                transition={{ duration: 0.5, delay: 1.2 }}
-              />
-            </svg>
+                return (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: lineVisible ? 1 : 0 }}
+                    transition={{ duration: 0 }}
+                  >
+                    <span className={`inline-block px-1.5 py-0.5 ${isHighlighted ? "bg-white text-black font-bold" : "text-white/80"}`}>
+                      {line}
+                    </span>
+                  </motion.div>
+                );
+              })}
+            </div>
 
-            {/* Loading Text */}
-            <motion.div
-               initial={{ opacity: 0, y: 10 }}
-               animate={{ opacity: 1, y: 0 }}
-               transition={{ duration: 0.5, delay: 1.5 }}
-               className="absolute -bottom-12 font-mono text-[10px] md:text-xs tracking-[0.3em] text-neutral-500 uppercase font-bold"
-            >
-              Meow.sys initializing...
-            </motion.div>
-          </motion.div>
+            {/* Middle Column - ( DONE ) */}
+            <div className="flex md:justify-center">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: visibleLines >= leftLines.length ? 1 : 0 }}
+                transition={{ duration: 0.5 }}
+                className="text-white/60 font-bold"
+              >
+                ( DONE )
+              </motion.div>
+            </div>
+
+            {/* Right Column - Typing Paragraph */}
+            <div className="flex md:justify-end">
+              <div className="max-w-[300px] text-left text-white/80 leading-relaxed uppercase">
+                {typedRight}
+                <motion.span
+                  animate={{ opacity: [1, 0] }}
+                  transition={{ repeat: Infinity, duration: 0.8 }}
+                  className="inline-block w-2 h-3 ml-1 bg-white align-middle"
+                />
+              </div>
+            </div>
+
+          </div>
         </motion.div>
       )}
     </AnimatePresence>
