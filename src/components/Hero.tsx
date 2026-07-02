@@ -3,6 +3,9 @@
 import { useRef, useEffect, useState } from "react";
 import { motion, useMotionValue, useSpring } from "framer-motion";
 
+const HERO_TEXT_CLASS =
+  "inline-block text-[clamp(3.5rem,12vw,13rem)] leading-[0.9] tracking-[-0.04em] font-bold font-display will-change-transform";
+
 function HeroLetter({
   char,
   index,
@@ -72,7 +75,7 @@ function HeroLetter({
   return (
     <motion.span
       ref={letterRef}
-      className="inline-block hero-name font-display will-change-transform"
+      className={HERO_TEXT_CLASS}
       style={{ x: springX, y: springY }}
       initial={{ opacity: 0, y: 60 }}
       animate={{ opacity: 1, y: 0 }}
@@ -142,13 +145,13 @@ export default function Hero() {
       </motion.div>
 
       {/* Name */}
-      <div className="mb-4 -ml-1 md:-ml-2">
+      <div className="mb-4 -ml-1 md:-ml-3">
         <div className="flex flex-wrap" aria-label="Andhika Rafi">
           {firstName.split("").map((char, i) =>
             isMobile ? (
               <motion.span
                 key={`first-${i}`}
-                className="inline-block hero-name font-display"
+                className={HERO_TEXT_CLASS}
                 initial={{ opacity: 0, y: 60 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{
@@ -177,7 +180,7 @@ export default function Hero() {
               isMobile ? (
                 <motion.span
                   key={`last-${i}`}
-                  className="inline-block hero-name font-display"
+                  className={HERO_TEXT_CLASS}
                   initial={{ opacity: 0, y: 60 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{
