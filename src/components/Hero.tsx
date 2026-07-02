@@ -3,56 +3,43 @@
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import dynamic from "next/dynamic";
 
+const Scene = dynamic(() => import("./Scene"), { ssr: false });
 gsap.registerPlugin(ScrollTrigger);
 
 export default function Hero() {
-  const sectionRef = useRef<HTMLElement>(null);
+  const containerRef = useRef<HTMLElement>(null);
+  const textRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Stagger-reveal letters
-      gsap.from(".hero-letter", {
-        y: 200,
+      // Kinetic text entry animation
+      gsap.from(".hero-char", {
+        y: 150,
         opacity: 0,
-        rotateX: -40,
-        stagger: 0.04,
-        duration: 1.2,
-        ease: "expo.out",
-        delay: 2.6,
+        rotateX: -90,
+        stagger: 0.05,
+        duration: 1.5,
+        ease: "power4.out",
+        delay: 0.5,
       });
 
-      gsap.from(".hero-sub", {
-        y: 40,
+      // Scroll distortion/parallax
+      gsap.to(textRef.current, {
+        y: 250,
+        scale: 0.9,
         opacity: 0,
-        duration: 0.8,
-        delay: 3.4,
-        ease: "power3.out",
-      });
-
-      // Parallax on scroll
-      gsap.to(".hero-name", {
-        yPercent: -60,
+        filter: "blur(10px)",
         ease: "none",
         scrollTrigger: {
-          trigger: sectionRef.current,
+          trigger: containerRef.current,
           start: "top top",
           end: "bottom top",
           scrub: 1,
         },
       });
-
-      gsap.to(".hero-sub", {
-        yPercent: 30,
-        ease: "none",
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top top",
-          end: "bottom top",
-          scrub: 1,
-        },
-      });
-    }, sectionRef);
+    }, containerRef);
 
     return () => ctx.revert();
   }, []);
@@ -62,59 +49,62 @@ export default function Hero() {
 
   return (
     <section
-      ref={sectionRef}
+      ref={containerRef}
       id="hero"
-      className="relative h-screen flex flex-col justify-center items-center overflow-hidden"
+      className="relative h-screen w-full flex flex-col items-center justify-center overflow-hidden bg-[#FAFAF9]"
     >
-      {/* Ambient blobs */}
-      <div className="absolute top-1/4 -left-32 w-[500px] h-[500px] bg-[#2A4CFF]/15 fluid-blob blur-[150px] pointer-events-none" />
-      <div className="absolute bottom-1/4 -right-32 w-[400px] h-[400px] bg-[#DFF25C]/10 fluid-blob blur-[120px] pointer-events-none" style={{ animationDelay: "-4s" }} />
+      {/* 3D Asset Background */}
+      <Scene />
 
-      <div className="hero-name text-center z-10">
-        {/* First name */}
-        <div className="overflow-hidden">
-          <h1 className="font-display text-[13vw] md:text-[12vw] lg:text-[11vw] font-bold leading-[0.85] tracking-[-0.06em] text-white flex justify-center">
-            {firstName.split("").map((c, i) => (
-              <span key={i} className="hero-letter inline-block">
-                {c}
+      {/* Grid Overlay */}
+      <div 
+        className="absolute inset-0 z-0 opacity-[0.03] pointer-events-none" 
+        style={{
+          backgroundImage: `linear-gradient(#111 1px, transparent 1px), linear-gradient(90deg, #111 1px, transparent 1px)`,
+          backgroundSize: '50px 50px'
+        }}
+      />
+
+      <div ref={textRef} className="relative z-10 text-center pointer-events-none flex flex-col items-center">
+        {/* Kinetic Title */}
+        <div className="perspective-1000">
+          <h1 className="font-display text-[15vw] leading-[0.8] tracking-[-0.04em] font-bold text-[#111] m-0 flex overflow-hidden">
+            {firstName.split("").map((char, i) => (
+              <span key={`f-${i}`} className="hero-char inline-block origin-bottom">
+                {char}
+              </span>
+            ))}
+          </h1>
+        </div>
+        <div className="perspective-1000 mt-[-2vw]">
+          <h1 className="font-display text-[15vw] leading-[0.8] tracking-[-0.04em] font-bold text-[#2A4CFF] m-0 flex overflow-hidden">
+            {lastName.split("").map((char, i) => (
+              <span key={`l-${i}`} className="hero-char inline-block origin-bottom" style={{ animationDelay: `${(firstName.length + i) * 0.05}s` }}>
+                {char}
               </span>
             ))}
           </h1>
         </div>
 
-        {/* Last name */}
-        <div className="overflow-hidden mt-[-2vw]">
-          <h1 className="font-display text-[13vw] md:text-[12vw] lg:text-[11vw] font-bold leading-[0.85] tracking-[-0.06em] text-[#2A4CFF] flex justify-center">
-            {lastName.split("").map((c, i) => (
-              <span
-                key={i}
-                className="hero-letter inline-block"
-                style={{ animationDelay: `${(firstName.length + i) * 0.04}s` }}
-              >
-                {c}
-              </span>
-            ))}
-          </h1>
-        </div>
-      </div>
-
-      {/* Subtitle */}
-      <div className="hero-sub mt-10 flex flex-col items-center gap-4 z-10">
-        <span className="inline-block bg-[#DFF25C] text-[#0a0a0a] px-6 py-2.5 rounded-full font-mono text-xs md:text-sm tracking-widest uppercase font-bold">
-          Software Developer & Data Science
-        </span>
-        <p className="text-white/50 font-mono text-xs tracking-widest uppercase">
-          Available for work — 2025
-        </p>
-      </div>
-
-      {/* Scroll indicator */}
-      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-3">
-        <span className="font-mono text-[10px] text-white/30 tracking-widest uppercase">
-          Scroll
-        </span>
-        <div className="w-[1px] h-12 bg-white/10 relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-1/2 bg-white/50 animate-bounce" />
+        {/* Subtitle & CTA */}
+        <div className="mt-12 flex flex-col items-center gap-6 hero-char opacity-0">
+          <p className="font-sans text-lg md:text-xl font-medium tracking-wide text-[#666]">
+            Software Developer & Data Science Enthusiast
+          </p>
+          
+          <a 
+            href="#about"
+            className="group flex flex-col items-center gap-2 pointer-events-auto"
+            data-cursor-hover
+            data-cursor-label="Explore"
+          >
+            <span className="font-mono text-[10px] tracking-widest uppercase text-[#111]">
+              Scroll Down
+            </span>
+            <div className="w-[1px] h-12 bg-[#111]/20 relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-full h-1/2 bg-[#111] animate-bounce" />
+            </div>
+          </a>
         </div>
       </div>
     </section>

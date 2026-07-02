@@ -1,61 +1,49 @@
 "use client";
 
-import { useRef, useMemo } from "react";
-import { useFrame } from "@react-three/fiber";
-import {
-  MeshTransmissionMaterial,
-  Environment,
-  Float,
-} from "@react-three/drei";
+import { useRef } from "react";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { Environment, MeshTransmissionMaterial, Float } from "@react-three/drei";
 import * as THREE from "three";
 
-export default function Scene() {
-  const mesh = useRef<THREE.Mesh>(null);
+function GlassShape() {
+  const meshRef = useRef<THREE.Mesh>(null);
 
-  // Rotate the mesh
-  useFrame((state, delta) => {
-    if (mesh.current) {
-      mesh.current.rotation.x += delta * 0.1;
-      mesh.current.rotation.y += delta * 0.15;
+  useFrame((state) => {
+    if (meshRef.current) {
+      meshRef.current.rotation.x = state.clock.getElapsedTime() * 0.2;
+      meshRef.current.rotation.y = state.clock.getElapsedTime() * 0.3;
     }
   });
 
-  // Create a custom torus knot geometry for a complex crystalline/abstract shape
-  const geometry = useMemo(() => new THREE.IcosahedronGeometry(2, 0), []);
-
   return (
-    <>
-      {/* Lighting & Environment */}
-      <ambientLight intensity={1.5} />
-      <directionalLight position={[10, 10, 10]} intensity={2} />
-      <Environment preset="city" />
+    <Float speed={2} rotationIntensity={1} floatIntensity={2}>
+      <mesh ref={meshRef}>
+        <torusKnotGeometry args={[1.5, 0.4, 256, 32]} />
+        <MeshTransmissionMaterial
+          backside
+          samples={16}
+          thickness={1.5}
+          roughness={0.1}
+          transmission={1}
+          ior={1.5}
+          chromaticAberration={0.4}
+          anisotropy={0.3}
+          color="#2A4CFF"
+        />
+      </mesh>
+    </Float>
+  );
+}
 
-      {/* Floating Abstract Object */}
-      <Float
-        speed={2} // Animation speed, defaults to 1
-        rotationIntensity={1} // XYZ rotation intensity, defaults to 1
-        floatIntensity={2} // Up/down float intensity, works like a multiplier with floatingRange,defaults to 1
-        floatingRange={[-0.5, 0.5]} // Range of y-axis values the object will float within, defaults to [-0.1,0.1]
-      >
-        <mesh ref={mesh} geometry={geometry} scale={1.5}>
-          <MeshTransmissionMaterial
-            backside
-            backsideThickness={5}
-            thickness={2}
-            roughness={0.1}
-            transmission={1}
-            ior={1.5}
-            chromaticAberration={0.4}
-            anisotropy={0.3}
-            distortion={0.5}
-            distortionScale={0.5}
-            temporalDistortion={0.1}
-            color="#ffffff"
-            attenuationColor="#2A4CFF"
-            attenuationDistance={1}
-          />
-        </mesh>
-      </Float>
-    </>
+export default function Scene() {
+  return (
+    <div className="absolute inset-0 z-0 opacity-80 pointer-events-none">
+      <Canvas camera={{ position: [0, 0, 6], fov: 45 }}>
+        <ambientLight intensity={1} />
+        <directionalLight position={[10, 10, 10]} intensity={2} />
+        <GlassShape />
+        <Environment preset="city" />
+      </Canvas>
+    </div>
   );
 }

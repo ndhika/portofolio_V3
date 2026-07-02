@@ -9,23 +9,31 @@ gsap.registerPlugin(ScrollTrigger);
 
 export default function AboutSection() {
   const sectionRef = useRef<HTMLElement>(null);
+  const imageRef = useRef<HTMLDivElement>(null);
+  const textRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Parallax images
-      gsap.to(".about-img-1", {
-        y: -80,
-        ease: "none",
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top bottom",
-          end: "bottom top",
-          scrub: 1.5,
-        },
-      });
+      // Image masking reveal
+      gsap.fromTo(
+        imageRef.current,
+        { clipPath: "polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%)" },
+        {
+          clipPath: "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
+          ease: "power3.inOut",
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top 60%",
+            end: "top 20%",
+            scrub: 1,
+          },
+        }
+      );
 
-      gsap.to(".about-img-2", {
-        y: 80,
+      // Image parallax inside mask
+      gsap.from(".about-img-inner", {
+        scale: 1.3,
+        y: 50,
         ease: "none",
         scrollTrigger: {
           trigger: sectionRef.current,
@@ -35,17 +43,17 @@ export default function AboutSection() {
         },
       });
 
-      // Text reveal
-      gsap.from(".about-text-reveal", {
-        y: 60,
+      // Text staggered reveal
+      gsap.from(".about-text-line", {
+        y: 80,
         opacity: 0,
-        stagger: 0.15,
-        duration: 1,
-        ease: "expo.out",
+        rotateX: -40,
+        stagger: 0.1,
+        duration: 1.2,
+        ease: "power3.out",
         scrollTrigger: {
-          trigger: ".about-content",
+          trigger: textRef.current,
           start: "top 80%",
-          toggleActions: "play none none reverse",
         },
       });
     }, sectionRef);
@@ -57,96 +65,73 @@ export default function AboutSection() {
     <section
       ref={sectionRef}
       id="about"
-      className="relative bg-[#111] text-white py-32 md:py-48 px-6 md:px-10 overflow-hidden"
+      className="relative bg-[#FAFAF9] text-[#111111] py-32 md:py-48 px-6 md:px-12 overflow-hidden"
     >
-      {/* Ambient light */}
-      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#2A4CFF]/8 rounded-full blur-[200px] pointer-events-none" />
-
-      <div className="max-w-[1600px] mx-auto relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-24">
-          {/* Left — Image Collage */}
-          <div className="lg:col-span-5 relative h-[500px] md:h-[650px]">
-            <div className="about-img-1 absolute top-0 left-0 w-[70%] aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl z-20">
+      <div className="max-w-[1600px] mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center">
+          
+          {/* Left - Masked Image */}
+          <div className="relative h-[600px] md:h-[800px] w-full flex items-center justify-center">
+            {/* Background Blob */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3/4 h-3/4 bg-[#DFF25C] rounded-full blur-[100px] opacity-30 pointer-events-none" />
+            
+            <div 
+              ref={imageRef} 
+              className="relative w-[80%] aspect-[3/4] overflow-hidden rounded-2xl shadow-2xl"
+            >
               <Image
                 src="/assests/ceritaku.png"
-                alt="Ceritaku Project"
+                alt="About Andhika"
                 fill
-                className="object-cover"
-                sizes="(max-width: 768px) 100vw, 35vw"
+                className="about-img-inner object-cover"
+                sizes="(max-width: 768px) 100vw, 50vw"
               />
             </div>
-
-            <div className="about-img-2 absolute bottom-0 right-0 w-[60%] aspect-square rounded-2xl overflow-hidden shadow-2xl z-10 border-4 border-[#111]">
-              <Image
-                src="/assests/cuaks.png"
-                alt="Creative Work"
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 100vw, 30vw"
-              />
-            </div>
-
-            {/* Floating accent */}
-            <div className="absolute top-1/3 right-4 w-28 h-28 bg-[#DFF25C] fluid-blob z-30 flex items-center justify-center shadow-lg" style={{ animationDelay: "-3s" }}>
-              <span className="font-mono text-[#0a0a0a] text-[10px] font-bold uppercase tracking-widest text-center leading-tight">
-                Since<br />2020
+            
+            <div className="absolute bottom-10 -right-10 md:right-10 bg-[#2A4CFF] text-white p-6 rounded-full w-32 h-32 flex items-center justify-center rotate-12 shadow-xl hover:rotate-0 transition-transform duration-500">
+              <span className="font-mono text-center text-xs font-bold uppercase tracking-widest leading-tight">
+                Since<br/>2020
               </span>
             </div>
           </div>
 
-          {/* Right — Text */}
-          <div className="lg:col-span-7 about-content flex flex-col justify-center">
-            <div className="about-text-reveal flex items-center gap-4 mb-8">
-              <div className="w-12 h-[2px] bg-[#DFF25C]" />
-              <span className="font-mono text-xs text-[#DFF25C] tracking-widest uppercase font-bold">
+          {/* Right - Text */}
+          <div ref={textRef} className="flex flex-col justify-center">
+            <div className="flex items-center gap-4 mb-8 about-text-line">
+              <div className="w-12 h-[2px] bg-[#2A4CFF]" />
+              <span className="font-mono text-xs text-[#2A4CFF] tracking-widest uppercase font-bold">
                 About Me
               </span>
             </div>
 
-            <h2 className="about-text-reveal font-display text-4xl md:text-6xl lg:text-7xl font-bold tracking-tighter leading-[1] mb-10">
-              Building things that{" "}
-              <span className="text-[#DFF25C] italic">work well</span> & look
-              right.
+            <h2 className="font-display text-5xl md:text-6xl lg:text-7xl font-bold tracking-tighter leading-[1] mb-10 text-[#111]">
+              <div className="overflow-hidden"><div className="about-text-line">Building things</div></div>
+              <div className="overflow-hidden"><div className="about-text-line">that <span className="text-[#2A4CFF] italic">work well</span></div></div>
+              <div className="overflow-hidden"><div className="about-text-line">& look right.</div></div>
             </h2>
 
-            <div className="space-y-6 max-w-xl">
-              <p className="about-text-reveal text-white/80 leading-relaxed text-lg font-medium">
-                Saya Andhika — kebanyakan orang panggil Dhika. Saya mulai ngoding
-                dari rasa penasaran yang sederhana: bagaimana sih halaman web bisa
-                jalan? Pertanyaan itu terus berkembang, dan sekarang sudah jadi
-                rutinitas harian saya membangun aplikasi web dari depan sampai
-                belakang.
+            <div className="space-y-6 max-w-xl font-sans text-lg text-[#666] leading-relaxed">
+              <p className="about-text-line">
+                Saya Andhika — kebanyakan orang panggil Dhika. Saya mulai ngoding dari rasa penasaran yang sederhana: bagaimana sih halaman web bisa jalan? Pertanyaan itu terus berkembang, dan sekarang sudah jadi rutinitas harian saya membangun aplikasi web dari depan sampai belakang.
               </p>
-
-              <p className="about-text-reveal text-white/50 leading-relaxed text-base">
-                Yang paling saya suka dari proses development itu momen ketika
-                sebuah fitur akhirnya berjalan mulus — mulai dari desain API yang
-                rapi, query database yang efisien, sampai tampilan antarmuka yang
-                terasa responsive dan nyaman dipakai.
+              <p className="about-text-line">
+                Yang paling saya suka dari proses development itu momen ketika sebuah fitur akhirnya berjalan mulus — mulai dari desain API yang rapi, query database yang efisien, sampai tampilan antarmuka yang terasa responsive dan nyaman dipakai.
               </p>
             </div>
 
             {/* Skills */}
-            <div className="about-text-reveal flex flex-wrap gap-3 mt-12">
+            <div className="mt-12 flex flex-wrap gap-3">
               {[
-                "Laravel",
-                "React",
-                "Next.js",
-                "TypeScript",
-                "Python",
-                "Data Science",
-                "Tailwind CSS",
-                "Node.js",
+                "Laravel", "React", "Next.js", "TypeScript", 
+                "Python", "Data Science", "Tailwind CSS"
               ].map((skill) => (
-                <span
-                  key={skill}
-                  className="font-mono text-xs px-5 py-2 rounded-full text-white/80 tracking-widest uppercase border border-white/15 hover:bg-[#DFF25C] hover:text-[#0a0a0a] hover:border-[#DFF25C] transition-all duration-300 cursor-default"
-                >
+                <div key={skill} className="about-text-line border border-[#111]/20 px-5 py-2.5 rounded-full font-mono text-xs tracking-widest text-[#111] hover:bg-[#DFF25C] hover:border-[#DFF25C] transition-colors">
                   {skill}
-                </span>
+                </div>
               ))}
             </div>
           </div>
+          
         </div>
       </div>
     </section>

@@ -9,9 +9,26 @@ gsap.registerPlugin(ScrollTrigger);
 
 export default function ContactSection() {
   const sectionRef = useRef<HTMLElement>(null);
+  const bgRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
+      // Animate background color in for a dramatic finish
+      gsap.fromTo(
+        bgRef.current,
+        { clipPath: "circle(0% at 50% 100%)" },
+        {
+          clipPath: "circle(150% at 50% 100%)",
+          ease: "power2.inOut",
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top 60%",
+            end: "bottom bottom",
+            scrub: 1,
+          },
+        }
+      );
+
       gsap.from(".contact-reveal", {
         y: 100,
         opacity: 0,
@@ -20,16 +37,8 @@ export default function ContactSection() {
         ease: "power4.out",
         scrollTrigger: {
           trigger: sectionRef.current,
-          start: "top 75%",
+          start: "top 40%",
         },
-      });
-
-      // Blob animation
-      gsap.to(".contact-blob", {
-        rotate: 360,
-        duration: 20,
-        repeat: -1,
-        ease: "linear",
       });
     }, sectionRef);
 
@@ -40,22 +49,25 @@ export default function ContactSection() {
     <section
       ref={sectionRef}
       id="contact"
-      className="relative bg-[#0a0a0a] text-white py-32 md:py-48 px-6 md:px-10 overflow-hidden min-h-screen flex flex-col justify-end"
+      className="relative text-white py-32 md:py-48 px-6 md:px-12 min-h-screen flex flex-col justify-between overflow-hidden"
     >
-      {/* Decorative large typography background */}
-      <div className="absolute top-1/4 -left-20 opacity-[0.02] pointer-events-none select-none">
-        <h2 className="font-display text-[25vw] font-bold leading-none whitespace-nowrap">
-          LET'S TALK
-        </h2>
-      </div>
+      {/* Expanding Cobalt Blue Background */}
+      <div ref={bgRef} className="absolute inset-0 bg-[#2A4CFF] -z-10" />
 
-      <div className="absolute top-1/2 right-0 -translate-y-1/2 translate-x-1/3 contact-blob w-[600px] h-[600px] bg-[#2A4CFF]/20 rounded-full blur-[150px] pointer-events-none" />
+      {/* Grid Pattern overlay */}
+      <div 
+        className="absolute inset-0 z-0 opacity-[0.05] pointer-events-none" 
+        style={{
+          backgroundImage: `linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)`,
+          backgroundSize: '50px 50px'
+        }}
+      />
 
-      <div className="max-w-[1600px] mx-auto w-full relative z-10 flex flex-col justify-end flex-1">
+      <div className="max-w-[1600px] mx-auto w-full flex-1 flex flex-col justify-center z-10 relative">
         <div className="contact-reveal flex items-center gap-4 mb-10">
           <div className="w-12 h-[2px] bg-[#DFF25C]" />
           <span className="font-mono text-xs text-[#DFF25C] tracking-widest uppercase font-bold">
-            Get In Touch
+            Let's Talk
           </span>
         </div>
 
@@ -64,52 +76,36 @@ export default function ContactSection() {
             href="mailto:azumarafi@gmail.com"
             className="group inline-block"
             data-cursor-hover
-            data-cursor-label="Email"
+            data-cursor-label="Email Me"
           >
-            <h2 className="font-display text-5xl md:text-7xl lg:text-[8rem] font-bold tracking-tighter leading-[0.85] text-white group-hover:text-[#2A4CFF] transition-colors duration-500">
+            <h2 className="font-display text-5xl md:text-8xl lg:text-[10rem] font-bold tracking-tighter leading-[0.85] text-white">
               azumarafi
               <br />
-              <span className="md:ml-32">@gmail.com</span>
+              <span className="text-[#DFF25C] italic group-hover:pl-12 transition-all duration-500 ease-out">@gmail.com</span>
             </h2>
           </a>
         </div>
+      </div>
 
-        <p className="contact-reveal text-white/50 text-lg md:text-2xl mt-12 max-w-xl leading-relaxed font-medium">
-          Open for freelance projects, collaborations, or just a good
-          conversation about code and design.
-        </p>
+      <div className="contact-reveal max-w-[1600px] mx-auto w-full flex flex-col md:flex-row items-center justify-between pt-12 border-t border-white/20 gap-8 z-10 relative mt-24">
+        <div className="flex gap-8">
+          {socialLinks.map((link) => (
+            <a
+              key={link.name}
+              href={link.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-mono text-xs font-bold tracking-widest uppercase hover:text-[#DFF25C] transition-colors flex items-center gap-2 group"
+              data-cursor-hover
+            >
+              {link.name}
+              <span className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform">↗</span>
+            </a>
+          ))}
+        </div>
 
-        {/* Footer info */}
-        <div className="contact-reveal flex flex-col md:flex-row md:items-end justify-between mt-32 pt-10 border-t border-white/10 gap-10">
-          <div className="flex flex-wrap gap-8">
-            {socialLinks.map((link) => (
-              <a
-                key={link.name}
-                href={link.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-mono text-xs text-white tracking-widest uppercase hover:text-[#DFF25C] transition-colors duration-300 flex items-center gap-2 group"
-                data-cursor-hover
-              >
-                <span>{link.name}</span>
-                <span className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform">↗</span>
-              </a>
-            ))}
-          </div>
-
-          <div className="flex flex-col md:items-end gap-2 text-left md:text-right">
-            <span className="font-mono text-xs text-white/50 tracking-widest uppercase">
-              Local Time: {new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-            </span>
-            <div className="flex items-center gap-4">
-              <span className="font-mono text-[10px] text-white/30 tracking-wider">
-                © {new Date().getFullYear()} ANDHIKA RAFI
-              </span>
-              <span className="font-mono text-[10px] text-white/30 tracking-wider">
-                BUILT WITH NEXT.JS
-              </span>
-            </div>
-          </div>
+        <div className="font-mono text-[10px] tracking-widest text-white/50 uppercase">
+          © {new Date().getFullYear()} ANDHIKA RAFI — ALL RIGHTS RESERVED
         </div>
       </div>
     </section>
