@@ -43,7 +43,6 @@ export default function Navbar() {
               {link.name}
             </span>
             
-            {/* Active Pill Background */}
             {active === link.name && (
               <motion.div
                 layoutId="active-pill"
@@ -52,7 +51,6 @@ export default function Navbar() {
               />
             )}
             
-            {/* Hover Pill Background */}
             {hovered === link.name && active !== link.name && (
               <motion.div
                 layoutId="hover-pill"
