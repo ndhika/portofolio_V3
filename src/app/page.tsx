@@ -4,9 +4,9 @@ import dynamic from "next/dynamic";
 import SmoothScroll from "@/components/SmoothScroll";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
-import AboutSection from "@/components/AboutSection";
+import StatementSection from "@/components/StatementSection";
+import MiniGallery from "@/components/MiniGallery";
 import DarkWorldSection from "@/components/DarkWorldSection";
-import EducationSection from "@/components/EducationSection";
 import ContactSection from "@/components/ContactSection";
 import Preloader from "@/components/Preloader";
 import NoiseFilter from "@/components/NoiseFilter";
@@ -31,13 +31,13 @@ export default function Home() {
         <main className="relative flex flex-col">
           {/* WORLD 01 — Light */}
           <Hero />
-          <AboutSection />
+          <StatementSection />
+          <MiniGallery />
 
           {/* WORLD 02 — The Dark Portal */}
           <DarkWorldSection />
 
-          {/* WORLD 03 — Return to Light */}
-          <EducationSection />
+          {/* WORLD 03 — Return to Light (Closing) */}
           <ContactSection />
         </main>
       </SmoothScroll>

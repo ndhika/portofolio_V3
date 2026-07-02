@@ -80,12 +80,11 @@ export default function ContactSection() {
                 letterSpacing: "-0.04em",
                 lineHeight: "0.92",
                 color: "var(--text)",
-                fontStyle: "italic",
               }}
             >
               azumarafi
               <br />
-              <span style={{ fontStyle: "normal", color: "var(--text-muted)" }}>
+              <span style={{ color: "var(--text-muted)" }}>
                 @gmail.com
               </span>
             </h2>

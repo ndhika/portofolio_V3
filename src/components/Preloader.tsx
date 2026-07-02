@@ -50,117 +50,41 @@ export default function Preloader() {
     <AnimatePresence>
       {!done && (
         <motion.div
-          className="fixed inset-0 z-[200] flex flex-col"
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
+          className="fixed inset-0 z-[200] flex flex-col justify-end p-8 md:p-14 lg:p-20 pointer-events-none"
+          style={{ background: "var(--bg)" }}
+          initial={{ y: "0%" }}
+          exit={{ y: "-100%" }}
+          transition={{
+            duration: 1.2,
+            ease: [0.76, 0, 0.24, 1], // Custom natural easing
+          }}
         >
-          {/* Top curtain */}
-          <motion.div
-            className="flex-1 flex flex-col justify-end px-8 md:px-14 lg:px-20 pb-10 relative overflow-hidden"
-            style={{ background: "var(--bg)" }}
-            animate={{
-              y: phase === "exiting" ? "-100%" : "0%",
-            }}
-            transition={{
-              duration: 1.2,
-              ease: [0.76, 0, 0.24, 1],
-            }}
-          >
-            {/* Subtle corner ornament */}
-            <div
-              className="absolute top-8 right-8 md:top-12 md:right-14"
-              style={{ color: "var(--text-dim)" }}
+          <div className="flex justify-between items-end overflow-hidden w-full">
+            <motion.div
+              className="text-label"
+              style={{ color: "var(--text-muted)" }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
             >
-              <span className="text-label" style={{ color: "var(--text-dim)" }}>
-                {new Date().getFullYear()}
-              </span>
-            </div>
-
-            <div className="space-y-3">
-              <motion.p
-                className="text-label"
-                style={{ color: "var(--text-dim)" }}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.8, delay: 0.2 }}
-              >
-                Portfolio
-              </motion.p>
-
-              <div className="overflow-hidden">
-                <motion.h1
-                  className="font-display font-medium"
-                  style={{
-                    color: "var(--text)",
-                    fontSize: "clamp(3.5rem, 10vw, 8rem)",
-                    letterSpacing: "-0.04em",
-                    lineHeight: "0.88",
-                  }}
-                  initial={{ y: "100%" }}
-                  animate={{ y: "0%" }}
-                  transition={{
-                    duration: 1.0,
-                    ease: [0.76, 0, 0.24, 1],
-                    delay: 0.15,
-                  }}
-                >
-                  Andhika
-                  <br />
-                  <span style={{ fontStyle: "italic" }}>Rafi</span>
-                </motion.h1>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Bottom curtain — progress lives here */}
-          <motion.div
-            className="flex-1 flex flex-col justify-start px-8 md:px-14 lg:px-20 pt-10 relative overflow-hidden"
-            style={{ background: "var(--bg-alt)" }}
-            animate={{
-              y: phase === "exiting" ? "100%" : "0%",
-            }}
-            transition={{
-              duration: 1.2,
-              ease: [0.76, 0, 0.24, 1],
-            }}
-          >
-            {/* Thin progress line at the split */}
-            <div
-              className="absolute top-0 left-0 h-[1px] transition-all duration-100"
+              Andhika Rafi — Portfolio
+            </motion.div>
+            
+            <motion.div
+              className="font-mono tabular-nums text-right flex items-baseline"
               style={{
-                width: `${progress}%`,
-                background: "var(--accent)",
+                color: "var(--text)",
+                fontSize: "1.25rem", // "tipografi kecil-menengah, bukan angka raksasa"
+                fontWeight: 400,
               }}
-            />
-
-            <div className="flex justify-between items-start">
-              <motion.p
-                className="text-label"
-                style={{ color: "var(--text-muted)" }}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.8, delay: 0.5 }}
-              >
-                Software Developer & Data Science
-              </motion.p>
-
-              <motion.span
-                className="font-mono tabular-nums"
-                style={{
-                  color: "var(--text-muted)",
-                  fontSize: "clamp(2rem, 6vw, 5rem)",
-                  fontWeight: 300,
-                  letterSpacing: "-0.02em",
-                  lineHeight: 1,
-                }}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.4, delay: 0.4 }}
-              >
-                {String(progress).padStart(3, "\u2007")}
-              </motion.span>
-            </div>
-          </motion.div>
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.4 }}
+            >
+              {String(progress).padStart(3, "\u2007")}
+              <span className="text-sm ml-1 opacity-50">%</span>
+            </motion.div>
+          </div>
         </motion.div>
       )}
     </AnimatePresence>

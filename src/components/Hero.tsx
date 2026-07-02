@@ -103,12 +103,12 @@ export default function Hero() {
           </span>
         </div>
 
-        {/* Main headline — editorial serif */}
+        {/* Main headline — bold modern grotesque */}
         <div className="overflow-hidden">
           <h1
-            className="hero-line text-display font-display font-medium"
+            className="hero-line text-display font-display font-bold"
             style={{
-              fontSize: "clamp(4rem, 13vw, 11rem)",
+              fontSize: "clamp(3.5rem, 12vw, 11rem)",
               color: "var(--text)",
             }}
           >
@@ -117,11 +117,11 @@ export default function Hero() {
         </div>
         <div className="overflow-hidden">
           <h1
-            className="hero-line text-display font-display font-medium"
+            className="hero-line text-display font-display font-bold"
             style={{
-              fontSize: "clamp(4rem, 13vw, 11rem)",
+              fontSize: "clamp(3.5rem, 12vw, 11rem)",
               color: "var(--text-muted)",
-              marginLeft: "clamp(1rem, 4vw, 6rem)", /* offset */
+              marginLeft: "clamp(1rem, 3vw, 5rem)", /* slightly smaller offset */
             }}
           >
             Developer
@@ -129,11 +129,9 @@ export default function Hero() {
         </div>
         <div className="overflow-hidden">
           <h1
-            className="hero-line font-display font-medium"
+            className="hero-line text-display font-display font-bold"
             style={{
-              fontSize: "clamp(4rem, 13vw, 11rem)",
-              letterSpacing: "-0.04em",
-              lineHeight: "0.9",
+              fontSize: "clamp(3.5rem, 12vw, 11rem)",
               color: "var(--text)",
             }}
           >

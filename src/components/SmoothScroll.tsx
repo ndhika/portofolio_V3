@@ -34,7 +34,7 @@ export default function SmoothScroll({ children }: { children: ReactNode }) {
       infinite: false,
     });
 
-    setLenisState(lenis);
+    setTimeout(() => setLenisState(lenis), 0);
 
     // Bridge Lenis → GSAP ScrollTrigger
     lenis.on("scroll", ScrollTrigger.update);

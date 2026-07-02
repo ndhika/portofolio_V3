@@ -7,7 +7,6 @@ import CustomCursor from "@/components/CustomCursor";
 import SmoothScroll from "@/components/SmoothScroll";
 import NoiseFilter from "@/components/NoiseFilter";
 import ContactSection from "@/components/ContactSection";
-import MagneticButton from "@/components/MagneticButton";
 
 export default async function ProjectDetail({
   params,
@@ -108,18 +107,29 @@ export default async function ProjectDetail({
             </div>
           </div>
 
-          {/* Hero Image */}
-          <div className="px-6 md:px-12 lg:px-20 max-w-[1400px] mx-auto mb-24 md:mb-40">
-            <div className="relative w-full aspect-video overflow-hidden rounded-sm bg-neutral-200">
+          {/* Hero Image (Full Bleed) */}
+          <div className="w-full mb-12 md:mb-24">
+            <div className="relative w-full h-[60vh] md:h-[85vh] overflow-hidden bg-neutral-200">
               <div className="shimmer absolute inset-0 z-0" />
               <Image
                 src={project.image}
                 alt={project.title}
                 fill
                 className="object-cover relative z-10"
-                sizes="(max-width: 1400px) 100vw, 1400px"
+                sizes="100vw"
+                priority
               />
             </div>
+          </div>
+
+          {/* Additional Gallery Placeholder */}
+          <div className="px-6 md:px-12 lg:px-20 max-w-[1300px] mx-auto mb-24 md:mb-40 grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-12">
+             <div className="relative w-full aspect-[4/5] bg-neutral-100 rounded-sm overflow-hidden group">
+                <Image src={project.image} alt={project.title + " Detail"} fill className="object-cover grayscale group-hover:grayscale-0 transition-all duration-700" />
+             </div>
+             <div className="relative w-full aspect-[4/5] bg-neutral-100 rounded-sm overflow-hidden group mt-12 md:mt-24">
+                <Image src={project.image} alt={project.title + " Detail"} fill className="object-cover grayscale group-hover:grayscale-0 transition-all duration-700" />
+             </div>
           </div>
 
           {/* Next Project Nav */}
