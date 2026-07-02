@@ -19,13 +19,17 @@ export const metadata: Metadata = {
   description: "Software Engineer & Data Scientist",
 };
 
+import SmoothScroll from "@/components/SmoothScroll";
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${spaceGrotesk.variable} ${instrumentSerif.variable}`}>
-      <body className="font-sans antialiased bg-white text-neutral-950">
-        {children}
+    <html lang="en" className={`${spaceGrotesk.variable} ${instrumentSerif.variable} overflow-x-hidden`}>
+      <body className="font-sans antialiased bg-white text-neutral-950 overflow-x-hidden">
+        <SmoothScroll>
+          {children}
+        </SmoothScroll>
       </body>
     </html>
   );

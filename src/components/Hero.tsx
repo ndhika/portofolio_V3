@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Float, MeshTransmissionMaterial, Environment } from "@react-three/drei";
 import * as THREE from "three";
+import Decorations from "./Decorations";
 
 function BlurText({ text, delay = 0, className = "" }: { text: string; delay?: number; className?: string }) {
   const characters = text.split("");
@@ -185,25 +186,7 @@ export default function Hero() {
 
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_transparent_0%,_#ffffff_100%)] z-0 pointer-events-none opacity-50" />
 
-      <div className="absolute left-6 md:left-12 top-0 bottom-0 w-[1px] bg-neutral-900/10 hidden md:block" />
-      <div className="absolute right-6 md:right-12 top-0 bottom-0 w-[1px] bg-neutral-900/10 hidden md:block" />
-      
-      <div className="absolute left-0 top-32 right-0 h-[1px] bg-neutral-900/10 hidden md:block" />
-      <div className="absolute left-0 bottom-32 right-0 h-[1px] bg-neutral-900/10 hidden md:block" />
-      
-      <div className="absolute left-12 top-32 w-3 h-3 -translate-x-1/2 -translate-y-1/2 border border-neutral-900/30 rounded-full hidden md:block" />
-      <div className="absolute right-12 top-32 w-3 h-3 -translate-x-1/2 -translate-y-1/2 border border-neutral-900/30 rounded-full hidden md:block" />
-      
-      <motion.div
-        initial={{ opacity: 0, x: -20 }}
-        animate={isLoading ? { opacity: 0, x: -20 } : { opacity: 1, x: 0 }}
-        transition={{ duration: 1, delay: 1 }}
-        className="absolute left-4 md:left-12 top-1/2 -translate-y-1/2 z-50 pointer-events-none mix-blend-difference hidden md:block"
-      >
-        <div className="transform -rotate-90 origin-left whitespace-nowrap text-[10px] md:text-xs tracking-[0.4em] uppercase font-bold text-white">
-          EST. 2026 — DIGITAL PORTFOLIO
-        </div>
-      </motion.div>
+      <Decorations isLoading={isLoading} />
 
       <div className="z-10 flex flex-col items-center text-center px-4 w-full pointer-events-none mt-16 mix-blend-difference">
         <div className="flex flex-wrap justify-center gap-x-3 md:gap-x-6 overflow-hidden">
