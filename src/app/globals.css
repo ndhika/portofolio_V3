@@ -1,35 +1,137 @@
 @import "tailwindcss";
 
 @theme {
-  --color-background: #000000;
-  --color-foreground: #ffffff;
+  --color-background: #FAFAF9;
+  --color-foreground: #111111;
+  --color-accent: #2A4CFF;
+  --color-lime: #DFF25C;
   --font-sans: var(--font-inter);
+  --font-display: var(--font-space-grotesk);
+  --font-mono: var(--font-jetbrains-mono);
 }
 
 :root {
-  --background: #000000;
-  --foreground: #ffffff;
+  --background: #FAFAF9;
+  --foreground: #111111;
+  --accent: #2A4CFF;
+  --lime: #DFF25C;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #000000;
-    --foreground: #ffffff;
-  }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: auto; /* Lenis handles smooth scroll */
+}
+
+html.lenis, html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
   overflow-x: hidden;
-}
-
-.text-balance {
-  text-wrap: balance;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 ::selection {
-  background-color: #333;
+  background-color: var(--accent);
   color: #fff;
+}
+
+/* Focus states for keyboard navigation */
+*:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Custom cursor hide on mobile */
+@media (pointer: coarse) {
+  .custom-cursor {
+    display: none !important;
+  }
+}
+
+/* Hide default cursor when custom cursor is active */
+.cursor-none * {
+  cursor: none !important;
+}
+
+/* Monospace label style */
+.mono-label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #999;
+}
+
+/* Hero name oversized */
+.hero-name {
+  font-size: clamp(3.5rem, 12vw, 13rem);
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  font-weight: 700;
+}
+
+/* Horizontal rule style */
+.hr-accent {
+  height: 1px;
+  background: #e0e0e0;
+  border: none;
+  width: 100%;
+}
+
+/* Project hover image */
+.project-image-follow {
+  pointer-events: none;
+  position: fixed;
+  z-index: 50;
+  width: 350px;
+  height: 220px;
+  object-fit: cover;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+/* Scrollbar minimal */
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #aaa;
 }
