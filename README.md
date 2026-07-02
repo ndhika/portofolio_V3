@@ -32,28 +32,3 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
-## Structure
-
-```
-src/
-├── app/
-│   ├── globals.css      # Design system + Tailwind config
-│   ├── layout.tsx        # Root layout with fonts + SEO
-│   └── page.tsx          # Main page composition
-├── components/
-│   ├── SmoothScroll.tsx  # Lenis wrapper
-│   ├── CustomCursor.tsx  # Custom cursor with hover states
-│   ├── Navbar.tsx        # Fixed minimal navbar
-│   ├── Hero.tsx          # Kinetic typography hero
-│   ├── ProjectsSection.tsx # Project grid with hover-reveal
-│   ├── AboutSection.tsx  # About section with photo + bio
-│   └── ContactSection.tsx # Email CTA + footer
-└── lib/
-    ├── data.ts           # Project data + social links
-    └── utils.ts          # Tailwind merge utility
-```
-
-## Author
-
-**Andhika Hisyam Muhammad Rafi**  
-[dhikarafi.me](https://dhikarafi.me) · [GitHub](https://github.com/ndhika) · [LinkedIn](https://www.linkedin.com/in/andhika-hisyam-muhammad-rafi/)
