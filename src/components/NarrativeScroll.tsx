@@ -3,6 +3,8 @@
 import { useRef, useState, useEffect } from "react";
 import Hero from "./Hero";
 import About from "./About";
+import Education from "./Education";
+import ShutterTransition from "./ShutterTransition";
 import Navbar from "./Navbar";
 import Loader from "./Loader";
 import gsap from "gsap";
@@ -84,6 +86,8 @@ export default function NarrativeScroll() {
 
       <section className="relative z-40 bg-[#1C1C1C] min-h-screen -mt-1 pt-1">
         <About />
+        <ShutterTransition />
+        <Education />
       </section>
 
       {!isLoading && <Navbar />}
