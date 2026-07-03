@@ -100,7 +100,7 @@ export default function About() {
           <h2 className="text-3xl md:text-4xl font-light text-white/70 font-sans tracking-wide">Hi! I&apos;m</h2>
           <h1 className="text-5xl md:text-6xl font-bold text-white font-sans mt-2 tracking-tight">Andhika.</h1>
           
-          <div className="mt-6 px-4 py-2 rounded-full bg-white/5 border border-white/10 flex items-center gap-3 text-[10px] md:text-xs font-mono text-white/70 tracking-widest uppercase">
+          <div className="mt-6 px-4 py-2 rounded-full bg-[#1C1C1C]/70 backdrop-blur-md border border-white/10 shadow-[0_0_15px_rgba(0,0,0,0.5)] flex items-center gap-3 text-[10px] md:text-xs font-mono text-white/70 tracking-widest uppercase">
             SOFTWARE ENGINEER <span className="text-[#D4AF37]">●</span> DATA SCIENTIST
           </div>
         </div>

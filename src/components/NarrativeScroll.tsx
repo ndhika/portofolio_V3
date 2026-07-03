@@ -3,7 +3,8 @@
 import { useRef, useState, useEffect } from "react";
 import Hero from "./Hero";
 import About from "./About";
-import Education from "./Education";
+import Experience from "./Experience";
+import TechStack from "./TechStack";
 import ContinuousLine from "./ContinuousLine";
 import Navbar from "./Navbar";
 import Loader from "./Loader";
@@ -108,14 +109,17 @@ export default function NarrativeScroll() {
 
       <section className="relative z-40 bg-[#1C1C1C] min-h-screen -mt-1 pt-1">
         
-        {/* The Continuous Glowing Line spanning all Dark World sections */}
-        <div className="absolute inset-0 z-0 pointer-events-none">
-          <ContinuousLine />
-        </div>
+        {/* About Section gets its own container with the line */}
+        <div className="dark-world-container relative w-full h-full">
+           <div className="absolute inset-0 z-0 pointer-events-none">
+             <ContinuousLine />
+           </div>
 
         <div className="relative z-10">
           <About />
-          <Education />
+          <Experience />
+          <TechStack />
+        </div>
         </div>
 
       </section>
