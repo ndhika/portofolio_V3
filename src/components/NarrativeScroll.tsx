@@ -4,7 +4,7 @@ import { useRef, useState, useEffect } from "react";
 import Hero from "./Hero";
 import About from "./About";
 import Education from "./Education";
-import ShutterTransition from "./ShutterTransition";
+import ContinuousLine from "./ContinuousLine";
 import Navbar from "./Navbar";
 import Loader from "./Loader";
 import gsap from "gsap";
@@ -107,9 +107,17 @@ export default function NarrativeScroll() {
       </div>
 
       <section className="relative z-40 bg-[#1C1C1C] min-h-screen -mt-1 pt-1">
-        <About />
-        <ShutterTransition />
-        <Education />
+        
+        {/* The Continuous Glowing Line spanning all Dark World sections */}
+        <div className="absolute inset-0 z-0 pointer-events-none">
+          <ContinuousLine />
+        </div>
+
+        <div className="relative z-10">
+          <About />
+          <Education />
+        </div>
+
       </section>
 
       {!isLoading && <Navbar />}
