@@ -22,16 +22,56 @@ export default function ContinuousLine() {
       overflow="visible"
       className="absolute top-0 left-0 w-full h-full pointer-events-none z-0"
     >
+      {/* Layer 1: Soft Ambient Glow (Wider, highly transparent) */}
       <motion.path 
         d={pathData}
-        stroke="rgba(255, 255, 255, 0.7)"
-        strokeWidth="2"
+        stroke="url(#wowGradient)"
+        strokeWidth="16"
         strokeLinecap="round"
+        opacity="0.25"
         style={{ 
           pathLength: scrollYProgress,
-          filter: "drop-shadow(0 0 4px rgba(255, 255, 255, 0.2))"
+          filter: "blur(6px)"
         }}
       />
+      
+      {/* Layer 2: Tighter Inner Glow */}
+      <motion.path 
+        d={pathData}
+        stroke="url(#wowGradient)"
+        strokeWidth="6"
+        strokeLinecap="round"
+        opacity="0.6"
+        style={{ 
+          pathLength: scrollYProgress,
+          filter: "blur(2px)"
+        }}
+      />
+
+      {/* Layer 3: The Crisp Solid Core Line */}
+      <motion.path 
+        d={pathData}
+        stroke="url(#wowGradient)"
+        strokeWidth="3"
+        strokeLinecap="round"
+        style={{ 
+          pathLength: scrollYProgress 
+        }}
+      />
+
+      {/* 
+        ==========================================
+        GRADIENT DEFINITION (THE WOW FACTOR)
+        ==========================================
+      */}
+      <defs>
+        <linearGradient id="wowGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="#D4AF37" />    {/* Elegant Gold (Hanya di ujung atas) */}
+          <stop offset="20%" stopColor="#2DD4BF" />   {/* Cepat berubah ke Soft Teal */}
+          <stop offset="60%" stopColor="#00E5FF" />   {/* Vibrant Cyan */}
+          <stop offset="100%" stopColor="#3B82F6" />  {/* Deep Blue di bawah */}
+        </linearGradient>
+      </defs>
     </svg>
   );
 }

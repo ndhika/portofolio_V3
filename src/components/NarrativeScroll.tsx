@@ -8,14 +8,24 @@ import TechStack from "./TechStack";
 import ContinuousLine from "./ContinuousLine";
 import Navbar from "./Navbar";
 import Loader from "./Loader";
+import Works from "./Works";
 import gsap from "gsap";
 import ScrollTrigger from "gsap/ScrollTrigger";
 
 export default function NarrativeScroll() {
   const [isLoading, setIsLoading] = useState(true);
+  
   const containerRef = useRef<HTMLDivElement>(null);
   const dotRef = useRef<HTMLDivElement>(null);
   const phaseTextRef = useRef<HTMLDivElement>(null);
+
+  const exitContainerRef = useRef<HTMLDivElement>(null);
+  const topHalfRef = useRef<HTMLDivElement>(null);
+  const bottomHalfRef = useRef<HTMLDivElement>(null);
+
+  const cutLineRef = useRef<HTMLDivElement>(null);
+  const exitTextRef = useRef<HTMLDivElement>(null);
+  const preSplitTextRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (isLoading) return;
@@ -23,6 +33,7 @@ export default function NarrativeScroll() {
     gsap.registerPlugin(ScrollTrigger);
 
     const ctx = gsap.context(() => {
+      // Entry Animation
       gsap.set(dotRef.current, {
         xPercent: -50,
         yPercent: -50,
@@ -59,7 +70,44 @@ export default function NarrativeScroll() {
         "expand+=0.2"
       );
 
-    }, containerRef);
+      // Sci-Fi Hatch Exit Transition
+      const exitTl = gsap.timeline({
+        scrollTrigger: {
+          trigger: exitContainerRef.current,
+          start: "top top",
+          end: "+=80%", // Reduced scroll distance for a much faster/snappier interaction
+          scrub: true,
+          pin: true,
+        }
+      });
+
+      exitTl.set([topHalfRef.current, bottomHalfRef.current], { yPercent: 0 })
+      .set(cutLineRef.current, { scaleX: 0, opacity: 1 })
+      
+      // 0. Fade out the "Breach Detected" warning
+      .to(preSplitTextRef.current, { opacity: 0, scale: 1.1, duration: 0.1, ease: "power2.out" })
+
+      // 1. Cyan Laser cuts horizontally across the darkness
+      .to(cutLineRef.current, { scaleX: 1, duration: 0.3, ease: "power4.inOut" })
+      
+      // 2. Laser flashes bright white
+      .to(cutLineRef.current, { backgroundColor: "#ffffff", boxShadow: "0 0 40px #ffffff", height: "4px", duration: 0.1 })
+      
+      // 3. Screen Splits! (Top goes up, Bottom goes down) revealing the white world
+      .to(topHalfRef.current, { yPercent: -100, duration: 0.6, ease: "power3.inOut" }, "split")
+      .to(bottomHalfRef.current, { yPercent: 100, duration: 0.6, ease: "power3.inOut" }, "split")
+      
+      // 4. Laser expands vertically simulating blinding light, then fades
+      .to(cutLineRef.current, { height: "100vh", opacity: 0, duration: 0.6, ease: "power2.in" }, "split")
+      
+      // 5. Fade in the "Phase 3" text over the newly revealed white world
+      .fromTo(exitTextRef.current,
+        { opacity: 0, scale: 0.9, y: 20 },
+        { opacity: 1, scale: 1, y: 0, duration: 0.3 },
+        "split+=0.2"
+      );
+
+    }); // No scope attached since we are animating across multiple refs
 
     return () => ctx.revert();
   }, [isLoading]);
@@ -123,6 +171,44 @@ export default function NarrativeScroll() {
         </div>
 
       </section>
+
+      {/* Sci-Fi Hatch Exit Transition */}
+      <div ref={exitContainerRef} className="relative h-screen w-full overflow-hidden bg-white z-50">
+        
+        {/* Top Dark Half */}
+        <div ref={topHalfRef} className="absolute top-0 left-0 w-full h-1/2 bg-[#1C1C1C] origin-top" />
+        
+        {/* Bottom Dark Half */}
+        <div ref={bottomHalfRef} className="absolute bottom-0 left-0 w-full h-1/2 bg-[#1C1C1C] origin-bottom" />
+
+        {/* Pre-Split Design (The Prank - Fake Footer) */}
+        <div ref={preSplitTextRef} className="absolute inset-0 flex flex-col items-center justify-center z-20 pointer-events-none gap-3">
+           <span className="font-serif italic text-sm md:text-base text-white/40">
+             Thank you for visiting.
+           </span>
+           <span className="font-mono text-[10px] md:text-xs tracking-widest text-white/20 uppercase">
+             © 2026 Ndhika. All Rights Reserved.
+           </span>
+        </div>
+
+        {/* The Glowing Cut Line */}
+        <div 
+          ref={cutLineRef} 
+          className="absolute top-1/2 left-0 w-full h-[2px] bg-[#00E5FF] shadow-[0_0_20px_#00E5FF] -translate-y-1/2 origin-center z-30" 
+        />
+
+        {/* Phase 3 Text (Revealed on White) */}
+        <div ref={exitTextRef} className="absolute inset-0 z-40 flex items-center justify-center pointer-events-none opacity-0 overflow-hidden mix-blend-difference">
+          <h2 className="text-xs md:text-sm font-mono text-white tracking-[0.3em] uppercase relative z-10 text-center">
+            // Phase 3: Featured Works
+          </h2>
+        </div>
+      </div>
+
+      {/* White Theme: Featured Works */}
+      <div className="relative bg-white z-40">
+        <Works />
+      </div>
 
       {!isLoading && <Navbar />}
     </>

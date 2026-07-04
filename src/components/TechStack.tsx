@@ -6,16 +6,16 @@ import ScrollTrigger from "gsap/ScrollTrigger";
 
 const techCategories = [
   {
-    title: "AI & Data Science",
-    skills: ["Python", "TensorFlow", "PyTorch", "CUDA", "OpenCV", "Pandas", "Scikit-Learn"]
+    title: "Frontend",
+    skills: ["React", "Vue.js", "TypeScript", "JavaScript", "Tailwind CSS", "UI/UX"]
   },
   {
-    title: "Software Engineering",
-    skills: ["TypeScript", "React", "Next.js", "Go", "Node.js", "GraphQL"]
+    title: "Backend",
+    skills: ["Laravel", "PHP", "Node.js", "REST APIs", "MySQL", "Database Design"]
   },
   {
-    title: "Cloud Architecture",
-    skills: ["AWS", "Docker", "Kubernetes", "CI/CD", "Terraform", "PostgreSQL", "Redis"]
+    title: "Systems",
+    skills: ["Clean Code", "Scalable Architecture", "Git / GitHub", "Figma", "Postman"]
   }
 ];
 
@@ -27,17 +27,16 @@ export default function TechStack() {
     
     const ctx = gsap.context(() => {
       gsap.fromTo(
-        ".compact-tech-col",
+        ".dashboard-pane-tech",
         { opacity: 0, y: 20 },
         {
           opacity: 1,
           y: 0,
-          duration: 0.6,
-          stagger: 0.1,
-          ease: "power2.out",
+          duration: 0.8,
+          ease: "power3.out",
           scrollTrigger: {
             trigger: containerRef.current,
-            start: "top 75%",
+            start: "top 80%",
           }
         }
       );
@@ -47,43 +46,58 @@ export default function TechStack() {
   }, []);
 
   return (
-    <div ref={containerRef} className="relative w-full py-20 px-6 md:px-12 lg:px-24 bg-transparent z-10">
-      <div className="max-w-5xl mx-auto flex flex-col md:flex-row gap-12 md:gap-20">
+    <div ref={containerRef} className="relative w-full py-16 px-6 md:px-12 z-10 flex justify-center overflow-hidden">
+      
+      {/* --- BACKGROUND HUD DECORATIONS (LEFT & RIGHT) --- */}
+      {/* Left Vertical Tracking Line */}
+      <div className="absolute left-6 md:left-12 top-0 bottom-0 w-[1px] bg-white/[0.03] hidden md:block" />
+      {/* Right Vertical Tracking Line */}
+      <div className="absolute right-6 md:right-12 top-0 bottom-0 w-[1px] bg-white/[0.03] hidden md:block" />
+      
+      {/* Rotated Data Text (Right) */}
+      <div className="absolute right-6 md:right-12 top-2/3 -translate-y-1/2 rotate-90 origin-right font-mono text-[8px] tracking-[0.5em] text-white/20 hidden xl:block">
+        MATRIX // CORE_TECH_SECURE
+      </div>
+
+      {/* Decorative Crosshairs (Left) */}
+      <div className="absolute left-6 md:left-12 top-1/4 -translate-x-1/2 font-mono text-xs text-[#00E5FF]/40 hidden xl:block">
+        +
+      </div>
+      <div className="absolute left-6 md:left-12 bottom-1/4 -translate-x-1/2 font-mono text-xs text-[#00E5FF]/40 hidden xl:block">
+        +
+      </div>
+
+      {/* Sleek, Compact Dashboard Pane */}
+      <div className="dashboard-pane-tech w-full max-w-4xl p-6 md:p-8 bg-[#050505]/60 backdrop-blur-xl border border-white/10 rounded-2xl shadow-[0_0_40px_rgba(0,0,0,0.8)] relative z-10">
         
-        {/* Compact Sidebar Header */}
-        <div className="w-full md:w-1/4 shrink-0">
-          <div className="sticky top-32">
-            <h2 className="text-3xl font-bold tracking-tight text-white mb-2">
-              Expertise.
-            </h2>
-            <p className="font-mono text-xs tracking-widest text-[#00E5FF] uppercase">
-              // Core Systems
-            </p>
-          </div>
+        {/* Subtle top glow */}
+        <div className="absolute top-0 right-1/4 w-1/2 h-[1px] bg-gradient-to-l from-transparent via-[#00E5FF]/50 to-transparent" />
+
+        {/* Dashboard Header */}
+        <div className="flex items-center gap-4 mb-10 border-b border-white/10 pb-4">
+          <div className="w-2 h-2 rounded-full bg-[#00E5FF] animate-pulse shadow-[0_0_8px_#00E5FF]" />
+          <h2 className="font-mono text-xs md:text-sm tracking-[0.2em] text-white uppercase">
+            Expertise // Core Systems
+          </h2>
         </div>
 
-        {/* Dense Multi-Column Layout */}
-        <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-8">
+        {/* Micro-Grid Layout */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6">
           {techCategories.map((category, idx) => (
-            <div key={idx} className="compact-tech-col flex flex-col">
+            <div key={idx} className="flex flex-col">
               
-              <div className="flex items-center gap-3 border-b border-white/10 pb-3 mb-5">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#00E5FF]" />
-                <h3 className="text-sm font-bold uppercase tracking-widest text-white">
-                  {category.title}
-                </h3>
-              </div>
+              <h3 className="text-xs font-bold text-white/40 uppercase tracking-widest mb-4">
+                {category.title}
+              </h3>
               
               <div className="flex flex-wrap gap-2">
                 {category.skills.map((skill, sIdx) => (
-                  <div 
+                  <span 
                     key={sIdx} 
-                    className="px-3 py-1.5 rounded bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all cursor-default"
+                    className="px-2.5 py-1 text-[10px] md:text-xs font-mono text-white/70 bg-white/5 border border-white/10 rounded hover:border-[#00E5FF]/50 hover:text-[#00E5FF] transition-colors cursor-default"
                   >
-                    <span className="font-mono text-[10px] tracking-wider text-white/80 uppercase">
-                      {skill}
-                    </span>
-                  </div>
+                    {skill}
+                  </span>
                 ))}
               </div>
 
