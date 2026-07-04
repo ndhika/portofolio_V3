@@ -94,7 +94,7 @@ export default function Experience() {
         <div className="flex items-center gap-4 mb-8 border-b border-white/10 pb-4">
           <div className="w-2 h-2 rounded-full bg-[#00E5FF] animate-pulse shadow-[0_0_8px_#00E5FF]" />
           <h2 className="font-mono text-xs md:text-sm tracking-[0.2em] text-white uppercase">
-            Experience // Career History
+            Experience {"//"} Career History
           </h2>
         </div>
 

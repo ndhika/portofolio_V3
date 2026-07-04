@@ -46,7 +46,8 @@ function RepellingParticles({ count, color, size, depth = 10 }: { count: number;
   }, [count, depth]);
 
   useFrame((state) => {
-    if (!mesh.current) return;
+    const instancedMesh = mesh.current;
+    if (!instancedMesh) return;
     
     const mouseX = (state.pointer.x * state.viewport.width) / 2;
     const mouseY = (state.pointer.y * state.viewport.height) / 2;
@@ -76,10 +77,10 @@ function RepellingParticles({ count, color, size, depth = 10 }: { count: number;
       dummy.scale.set(scale, scale, scale);
       
       dummy.updateMatrix();
-      mesh.current.setMatrixAt(i, dummy.matrix);
+      instancedMesh.setMatrixAt(i, dummy.matrix);
     });
     
-    mesh.current.instanceMatrix.needsUpdate = true;
+    instancedMesh.instanceMatrix.needsUpdate = true;
   });
 
   return (
@@ -159,20 +160,7 @@ function GlassObject() {
   );
 }
 
-export default function Hero() {
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const hasLoaded = sessionStorage.getItem("hasLoaded");
-    if (hasLoaded) {
-      setIsLoading(false);
-    } else {
-      const timer = setTimeout(() => {
-        setIsLoading(false);
-      }, 3500);
-      return () => clearTimeout(timer);
-    }
-  }, []);
+export default function Hero({ isLoading }: { isLoading: boolean }) {
 
   return (
     <section className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-white">

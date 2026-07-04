@@ -4,7 +4,7 @@ import { useRef } from "react";
 import { motion, useScroll } from "framer-motion";
 
 export default function ContinuousLine() {
-  const containerRef = useRef<SVGSVGElement>(null);
+  const containerRef = useRef<any>(null);
 
   const { scrollYProgress } = useScroll({
     target: containerRef,

@@ -150,7 +150,7 @@ export default function NarrativeScroll() {
 
           {/* Original Title Text */}
           <h2 className="text-xs md:text-sm font-mono text-white/50 tracking-[0.3em] uppercase relative z-10 text-center">
-            // Phase 2: About Me
+            {"//"} Phase 2: About Me
           </h2>
         </div>
       </div>
@@ -183,10 +183,10 @@ export default function NarrativeScroll() {
 
         {/* Pre-Split Design (The Prank - Fake Footer) */}
         <div ref={preSplitTextRef} className="absolute inset-0 flex flex-col items-center justify-center z-20 pointer-events-none gap-3">
-           <span className="font-serif italic text-sm md:text-base text-white/40">
+           <span className="font-sans text-sm md:text-base text-white/50 tracking-wide">
              Thank you for visiting.
            </span>
-           <span className="font-mono text-[10px] md:text-xs tracking-widest text-white/20 uppercase">
+           <span className="font-mono text-[10px] md:text-xs tracking-widest text-white/30 uppercase">
              © 2026 Ndhika. All Rights Reserved.
            </span>
         </div>
@@ -200,7 +200,7 @@ export default function NarrativeScroll() {
         {/* Phase 3 Text (Revealed on White) */}
         <div ref={exitTextRef} className="absolute inset-0 z-40 flex items-center justify-center pointer-events-none opacity-0 overflow-hidden mix-blend-difference">
           <h2 className="text-xs md:text-sm font-mono text-white tracking-[0.3em] uppercase relative z-10 text-center">
-            // Phase 3: Featured Works
+            {"//"} Phase 3: Featured Works
           </h2>
         </div>
       </div>

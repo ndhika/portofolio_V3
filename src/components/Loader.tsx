@@ -22,13 +22,14 @@ export default function Loader({ onLoadingComplete }: { onLoadingComplete: () =>
   useEffect(() => {
     const hasLoaded = sessionStorage.getItem("hasLoaded");
     if (hasLoaded) {
-      setIsVisible(false);
-      onLoadingComplete();
+      setTimeout(() => {
+        setIsVisible(false);
+        onLoadingComplete();
+      }, 0);
       return;
     }
 
     // Sequence timing
-    let timeout: NodeJS.Timeout;
 
     // Type out the left lines one by one
     const lineInterval = setInterval(() => {
@@ -51,7 +52,7 @@ export default function Loader({ onLoadingComplete }: { onLoadingComplete: () =>
     }, 20); // 20ms per char
 
     // End loader after everything is done and pop homepage
-    timeout = setTimeout(() => {
+    const timeout = setTimeout(() => {
       setIsVisible(false);
       sessionStorage.setItem("hasLoaded", "true");
       setTimeout(onLoadingComplete, 800); // Exit fade/scale animation time

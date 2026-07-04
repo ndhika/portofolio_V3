@@ -59,7 +59,7 @@ export default function Works() {
       <div className="max-w-7xl mx-auto mb-24 flex flex-col md:flex-row md:items-end justify-between border-b border-black/10 pb-8 gap-8">
         <div>
           <span className="font-mono text-xs tracking-widest text-black/40 uppercase mb-4 block">
-            // Selected Works
+            {"//"} Selected Works
           </span>
           <h2 className="text-5xl md:text-7xl font-black uppercase tracking-tighter leading-none">
             Featured <br /> Projects.
@@ -84,7 +84,7 @@ export default function Works() {
 
             <div className="flex flex-col md:text-right mt-6 md:mt-0 max-w-sm">
               <span className="font-mono text-xs tracking-widest text-black/50 uppercase mb-2">
-                {project.category} // {project.year}
+                {project.category} {"//"} {project.year}
               </span>
               <p className="text-sm text-black/60 font-light leading-relaxed">
                 {project.description}
