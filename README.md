@@ -12,7 +12,7 @@ Personal portfolio website built with **Next.js 15** (App Router), **TypeScript*
 - **Icons**: Lucide React
 - **Fonts**: Space Grotesk (display), Inter (body), JetBrains Mono (labels)
 
-## Features
+## Feature
 
 - 🎯 Kinetic hero typography with cursor-reactive letters
 - 🖱️ Custom cursor with contextual hover states
